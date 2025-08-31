@@ -33,28 +33,44 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
   }
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[40%]">Company</TableHead>
-            <TableHead>Date Applied</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {applications.map((application) => (
-            <ApplicationRow
-              key={application.id}
-              application={application}
-              onStatusChange={onStatusChange}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <>
+      {/* Mobile Card View */}
+      <div className="grid gap-4 sm:hidden">
+        {applications.map((application) => (
+          <ApplicationRow
+            key={application.id}
+            application={application}
+            onStatusChange={onStatusChange}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            isMobile
+          />
+        ))}
+      </div>
+      {/* Desktop Table View */}
+      <div className="hidden sm:block border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[40%]">Company</TableHead>
+              <TableHead>Date Applied</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {applications.map((application) => (
+              <ApplicationRow
+                key={application.id}
+                application={application}
+                onStatusChange={onStatusChange}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
   );
 }
