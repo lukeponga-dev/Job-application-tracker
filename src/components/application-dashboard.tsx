@@ -7,86 +7,36 @@ import { AppHeader } from "@/components/app-header";
 import { ApplicationList } from "@/components/application-list";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { deleteApplication, saveApplication, updateApplicationStatus } from "@/lib/applications.service";
+import { useRouter } from "next/navigation";
 
-const initialApplications: Application[] = [
-  {
-    id: "1",
-    companyName: "Innovate Inc.",
-    role: "Frontend Developer",
-    dateApplied: new Date("2024-05-10T00:00:00.000Z"),
-    status: "Interviewing",
-    notes: "Completed first round interview. Second round scheduled for next week.",
-  },
-  {
-    id: "2",
-    companyName: "Data Solutions",
-    role: "Data Analyst",
-    dateApplied: new Date("2024-05-15T00:00:00.000Z"),
-    status: "Applied",
-    notes: "Submitted application through their portal.",
-  },
-  {
-    id: "3",
-    companyName: "Creative Minds",
-    role: "UX/UI Designer",
-    dateApplied: new Date("2024-04-20T00:00:00.000Z"),
-    status: "Rejected",
-    notes: "Received automated rejection email.",
-  },
-  {
-    id: "4",
-    companyName: "NextGen Tech",
-    role: "Product Manager",
-    dateApplied: new Date("2024-03-12T00:00:00.000Z"),
-    status: "Offer",
-    notes: "Received a competitive offer. Currently negotiating salary.",
-  },
-];
+interface ApplicationDashboardProps {
+  initialApplications: Application[];
+}
 
-export function ApplicationDashboard() {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [isClient, setIsClient] = useState(false);
+export function ApplicationDashboard({ initialApplications }: ApplicationDashboardProps) {
+  const [applications, setApplications] = useState<Application[]>(initialApplications);
   const [filter, setFilter] = useState<Status | "All">("All");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
-    setIsClient(true);
-    // In a real app, you'd fetch data from an API. Here we use localStorage.
-    const storedApps = localStorage.getItem('jobApplications');
-    if (storedApps) {
-      try {
-        const parsedApps = JSON.parse(storedApps).map((app: any) => ({
-          ...app,
-          dateApplied: new Date(app.dateApplied),
-        }));
-        setApplications(parsedApps);
-      } catch (error) {
-        setApplications(initialApplications);
-      }
-    } else {
-      setApplications(initialApplications);
-    }
-  }, []);
+    setApplications(initialApplications);
+  }, [initialApplications]);
 
-  useEffect(() => {
-    if (isClient) {
-      localStorage.setItem('jobApplications', JSON.stringify(applications));
+  const handleSaveApplication = async (appData: Application) => {
+    try {
+      await saveApplication(appData);
+      toast({ title: "Success", description: `Application ${editingApplication ? 'updated' : 'added'} successfully.` });
+      setIsFormOpen(false);
+      setEditingApplication(null);
+    } catch (error) {
+      console.error(error);
+      toast({ variant: "destructive", title: "Error", description: "Failed to save application." });
     }
-  }, [applications, isClient]);
-
-  const handleSaveApplication = (appData: Application) => {
-    if (editingApplication) {
-      setApplications(apps => apps.map(app => (app.id === appData.id ? appData : app)));
-      toast({ title: "Success", description: "Application updated successfully." });
-    } else {
-      setApplications(apps => [appData, ...apps]);
-      toast({ title: "Success", description: "Application added successfully." });
-    }
-    setIsFormOpen(false);
-    setEditingApplication(null);
   };
 
   const handleOpenForm = (app: Application | null = null) => {
@@ -94,19 +44,37 @@ export function ApplicationDashboard() {
     setIsFormOpen(true);
   };
 
-  const handleStatusChange = (id: string, status: Status) => {
+  const handleStatusChange = async (id: string, status: Status) => {
+    // Optimistic update
+    const originalApplications = applications;
     setApplications(apps => apps.map(app => (app.id === id ? { ...app, status } : app)));
+    try {
+      await updateApplicationStatus(id, status);
+    } catch (error) {
+      setApplications(originalApplications);
+      console.error(error);
+      toast({ variant: "destructive", title: "Error", description: "Failed to update status." });
+    }
   };
 
   const handleDelete = (id: string) => {
     setDeletingApplicationId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deletingApplicationId) {
+       // Optimistic update
+      const originalApplications = applications;
       setApplications(apps => apps.filter(app => app.id !== deletingApplicationId));
-      toast({ title: "Success", description: "Application deleted." });
       setDeletingApplicationId(null);
+      try {
+        await deleteApplication(deletingApplicationId);
+        toast({ title: "Success", description: "Application deleted." });
+      } catch (error) {
+        setApplications(originalApplications);
+        console.error(error);
+        toast({ variant: "destructive", title: "Error", description: "Failed to delete application." });
+      }
     }
   };
   
@@ -115,10 +83,6 @@ export function ApplicationDashboard() {
     return applications.filter(app => app.status === filter);
   }, [applications, filter]);
 
-
-  if (!isClient) {
-    return null; // or a loading skeleton
-  }
 
   return (
     <>

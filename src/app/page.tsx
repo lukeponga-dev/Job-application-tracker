@@ -1,9 +1,13 @@
 import { ApplicationDashboard } from "@/components/application-dashboard";
 import { Sidebar, SidebarContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Briefcase } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { createApplicationsTable } from "@/lib/db";
+import { getApplications } from "@/lib/applications.service";
 
-export default function Home() {
+export default async function Home() {
+  await createApplicationsTable();
+  const initialApplications = await getApplications();
+
   return (
     <>
       <Sidebar>
@@ -20,7 +24,7 @@ export default function Home() {
         <header className="flex items-center justify-between p-4 border-b bg-card/50">
           <SidebarTrigger />
         </header>
-        <ApplicationDashboard />
+        <ApplicationDashboard initialApplications={initialApplications} />
       </SidebarInset>
     </>
   );
