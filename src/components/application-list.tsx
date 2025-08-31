@@ -4,12 +4,8 @@ import type { Application, Status } from "@/lib/types";
 import { ApplicationRow } from "./application-row";
 import { FileSearch } from "lucide-react";
 import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableRow,
-  TableHead,
-} from "@/components/ui/table"
+  Accordion
+} from "@/components/ui/accordion"
 
 
 interface ApplicationListProps {
@@ -33,44 +29,16 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
   }
 
   return (
-    <>
-      {/* Mobile Card View */}
-      <div className="grid gap-4 sm:hidden">
-        {applications.map((application) => (
-          <ApplicationRow
-            key={application.id}
-            application={application}
-            onStatusChange={onStatusChange}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            isMobile
-          />
-        ))}
-      </div>
-      {/* Desktop Table View */}
-      <div className="hidden sm:block border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[40%]">Company</TableHead>
-              <TableHead>Date Applied</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {applications.map((application) => (
-              <ApplicationRow
-                key={application.id}
-                application={application}
-                onStatusChange={onStatusChange}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </>
+    <Accordion type="single" collapsible className="w-full space-y-4">
+      {applications.map((application) => (
+        <ApplicationRow
+          key={application.id}
+          application={application}
+          onStatusChange={onStatusChange}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
+      ))}
+    </Accordion>
   );
 }

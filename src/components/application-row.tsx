@@ -3,15 +3,12 @@
 import type { Application, Status } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TableRow, TableCell } from "@/components/ui/table";
-import { Edit, Trash2, MoreVertical, Calendar } from "lucide-react";
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Edit, Trash2, Calendar, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +17,6 @@ interface ApplicationRowProps {
   onStatusChange: (id: string, status: Status) => void;
   onEdit: (application: Application) => void;
   onDelete: (id: string) => void;
-  isMobile?: boolean;
 }
 
 const getBadgeVariant = (status: Status): "default" | "secondary" | "destructive" | "outline" => {
@@ -34,97 +30,52 @@ const getBadgeVariant = (status: Status): "default" | "secondary" | "destructive
 };
 
 
-export function ApplicationRow({ application, onStatusChange, onEdit, onDelete, isMobile = false }: ApplicationRowProps) {
-  const { id, companyName, role, dateApplied, status } = application;
-
-  if (isMobile) {
-    return (
-       <Card className="w-full">
-        <CardHeader className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">{companyName}</CardTitle>
-              <CardDescription>{role}</CardDescription>
-            </div>
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                  <MoreVertical className="h-4 w-4" />
-                  <span className="sr-only">More options</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(application)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  <span>Edit</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDelete(id)} className="text-destructive focus:text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  <span>Delete</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-           <div className="flex items-center justify-between text-sm">
-             <Badge 
-                variant={getBadgeVariant(status)}
-                className={cn(
-                    "w-fit",
-                    status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
-                )}
-            >
-                {status}
-            </Badge>
-            <div className="flex items-center text-muted-foreground">
-                <Calendar className="mr-1.5 h-4 w-4" />
-                <span>{format(dateApplied, "MMM d, yyyy")}</span>
-            </div>
-           </div>
-        </CardContent>
-      </Card>
-    )
-  }
+export function ApplicationRow({ application, onEdit, onDelete }: ApplicationRowProps) {
+  const { id, companyName, role, dateApplied, status, notes } = application;
 
   return (
-    <TableRow>
-      <TableCell className="py-3">
-        <div className="font-medium">{companyName}</div>
-        <div className="text-sm text-muted-foreground">{role}</div>
-      </TableCell>
-      <TableCell className="py-3">{format(dateApplied, "MMM d, yyyy")}</TableCell>
-      <TableCell className="py-3">
-        <Badge 
-            variant={getBadgeVariant(status)}
-            className={cn(
-                "w-fit",
-                status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
+    <AccordionItem value={id} className="border-b-0">
+      <AccordionTrigger className="flex items-center justify-between w-full p-4 font-semibold text-left bg-card rounded-lg border hover:no-underline [&[data-state=open]]:rounded-b-none">
+        <div className="flex-1 text-left">
+            <p className="font-bold text-base text-foreground">{companyName}</p>
+            <p className="text-sm font-normal text-muted-foreground">{role}</p>
+        </div>
+        <div className="flex items-center gap-4 ml-4">
+          <Badge 
+              variant={getBadgeVariant(status)}
+              className={cn(
+                  "w-fit",
+                  status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
+              )}
+          >
+              {status}
+          </Badge>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="p-4 bg-card border border-t-0 rounded-b-lg">
+        <div className="space-y-4">
+            <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="mr-2 h-4 w-4" />
+                <span>Applied on {format(dateApplied, "MMM d, yyyy")}</span>
+            </div>
+            {notes && (
+                <div className="flex items-start text-sm text-muted-foreground">
+                    <FileText className="mr-2 h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="flex-1 whitespace-pre-wrap">{notes}</p>
+                </div>
             )}
-        >
-            {status}
-        </Badge>
-      </TableCell>
-      <TableCell className="text-right py-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">More options</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(application)}>
-              <Edit className="mr-2 h-4 w-4" />
-              <span>Edit</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(id)} className="text-destructive focus:text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Delete</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
+            <div className="flex justify-end space-x-2 pt-2">
+                <Button variant="outline" size="sm" onClick={() => onEdit(application)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                </Button>
+                <Button variant="destructive" size="sm" onClick={() => onDelete(id)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                </Button>
+            </div>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
