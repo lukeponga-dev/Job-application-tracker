@@ -52,6 +52,7 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
     resolver: zodResolver(ApplicationSchema),
     defaultValues: {
       id: application?.id || crypto.randomUUID(),
+      platform: "",
       companyName: "",
       role: "",
       dateApplied: new Date(),
@@ -73,6 +74,7 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
     } else {
       form.reset({
         id: crypto.randomUUID(),
+        platform: "",
         companyName: "",
         role: "",
         dateApplied: new Date(),
@@ -135,6 +137,19 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
+                name="platform"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Platform</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. LinkedIn, Seek" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="companyName"
                 render={({ field }) => (
                   <FormItem>
@@ -146,7 +161,8 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
                   </FormItem>
                 )}
               />
-              <FormField
+            </div>
+             <FormField
                 control={form.control}
                 name="role"
                 render={({ field }) => (
@@ -159,7 +175,6 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
                   </FormItem>
                 )}
               />
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}

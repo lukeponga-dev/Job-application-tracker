@@ -1,79 +1,54 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, PlusCircle, LayoutGrid, List, PanelLeft } from "lucide-react";
-import { useSidebar } from "./ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Download } from "lucide-react";
+import type { Status } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface AppHeaderProps {
-  onAdd: () => void;
   onExport: (format: "csv" | "pdf") => void;
-  view: 'card' | 'list';
-  onViewChange: (view: 'card' | 'list') => void;
   applicationCount: number;
+  filter: Status | "All";
+  onFilterChange: (filter: Status | "All") => void;
 }
 
-export function AppHeader({ onAdd, onExport, view, onViewChange, applicationCount }: AppHeaderProps) {
-    const { toggleSidebar } = useSidebar();
+const filterOptions: (Status | "All")[] = ["All", "Applied", "Interviewing", "Offer", "Rejected"];
+
+export function AppHeader({ onExport, applicationCount, filter, onFilterChange }: AppHeaderProps) {
   return (
-    <header className="flex items-center justify-between p-4 border-b bg-card sm:p-6 sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-            <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                onClick={toggleSidebar}
-            >
-                <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle Sidebar</span>
-            </Button>
-            <div>
-                 <h1 className="text-2xl font-bold text-foreground">
-                    My Applications
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                    You have {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}.
-                </p>
-            </div>
+    <header className="px-4 pt-6 pb-4 sticky top-0 z-10 bg-background">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            Applications
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {applicationCount} {applicationCount === 1 ? 'application' : 'applications'} found
+          </p>
         </div>
-
-      <div className="flex items-center gap-2">
-        <div className="hidden sm:flex items-center gap-2">
-            <Button variant={view === 'card' ? 'secondary' : 'ghost'} size="icon" onClick={() => onViewChange('card')}>
-              <LayoutGrid className="h-5 w-5" />
-              <span className="sr-only">Card View</span>
-            </Button>
-            <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => onViewChange('list')}>
-              <List className="h-5 w-5" />
-              <span className="sr-only">List View</span>
-            </Button>
-          </div>
-         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="h-9 w-9">
-              <Download className="h-4 w-4" />
-              <span className="sr-only">Export</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => onExport("csv")}>Export as CSV</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onExport("pdf")}>Export as PDF</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button onClick={onAdd} className="hidden sm:flex">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add New
+        <Button variant="ghost" size="icon" onClick={() => onExport("csv")}>
+          <Download className="h-5 w-5" />
+          <span className="sr-only">Export</span>
         </Button>
+      </div>
 
-         <Button onClick={onAdd} size="icon" className="sm:hidden h-10 w-10 fixed bottom-4 right-4 z-20 rounded-full shadow-lg">
-            <PlusCircle className="h-5 w-5" />
-            <span className="sr-only">Add Application</span>
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        {filterOptions.map((option) => (
+          <Button
+            key={option}
+            variant="ghost"
+            size="sm"
+            onClick={() => onFilterChange(option)}
+            className={cn(
+              "rounded-full px-4 h-8",
+              filter === option
+                ? "bg-secondary text-secondary-foreground"
+                : "text-muted-foreground"
+            )}
+          >
+            {option}
           </Button>
+        ))}
       </div>
     </header>
   );

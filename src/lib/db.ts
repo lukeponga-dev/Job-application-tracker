@@ -37,9 +37,22 @@ export async function createApplicationsTable() {
     console.log("Database connection not configured, skipping table creation.");
     return;
   }
+  // Check if platform column exists
+  const { rows } = await pool.sql`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_name='applications' AND column_name='platform';
+  `;
+
+  if (rows.length === 0) {
+    // If column doesn't exist, alter table to add it.
+    await pool.sql`ALTER TABLE applications ADD COLUMN platform VARCHAR(255);`;
+  }
+
   await pool.sql`
     CREATE TABLE IF NOT EXISTS applications (
       id UUID PRIMARY KEY,
+      platform VARCHAR(255),
       "companyName" VARCHAR(255) NOT NULL,
       role VARCHAR(255) NOT NULL,
       "dateApplied" DATE NOT NULL,

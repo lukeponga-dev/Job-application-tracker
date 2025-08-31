@@ -4,6 +4,7 @@ export const statusOptions = ["Applied", "Interviewing", "Offer", "Rejected"] as
 
 export const ApplicationSchema = z.object({
   id: z.string().default(() => crypto.randomUUID()),
+  platform: z.string().optional(),
   companyName: z.string().min(1, "Company name is required."),
   role: z.string().min(1, "Role is required."),
   dateApplied: z.date({

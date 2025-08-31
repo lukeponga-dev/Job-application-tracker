@@ -11,6 +11,7 @@ import { sql } from './db';
 function fromDb(app: Record<string, any>): Application {
     const parsed = ApplicationSchema.parse({
         id: app.id,
+        platform: app.platform,
         companyName: app.companyname,
         role: app.role,
         dateApplied: app.dateapplied,
@@ -22,13 +23,14 @@ function fromDb(app: Record<string, any>): Application {
 
 export async function getApplications(): Promise<Application[]> {
   // Use correct column names with quotes to preserve casing
-  const { rows } = await sql`SELECT id, "companyName", role, "dateApplied", status, notes FROM applications ORDER BY "dateApplied" DESC;`;
+  const { rows } = await sql`SELECT id, platform, "companyName", role, "dateApplied", status, notes FROM applications ORDER BY "dateApplied" DESC;`;
   
   // The 'rows' from vercel/postgres are already parsed into JS types.
   // We just need to validate against our schema.
   // We'll create a schema that matches the database return shape.
   const DbRowSchema = z.object({
       id: z.string(),
+      platform: z.string().nullable().optional(),
       companyName: z.string(),
       role: z.string(),
       dateApplied: z.date(),
@@ -38,6 +40,7 @@ export async function getApplications(): Promise<Application[]> {
 
   const appSchema = DbRowSchema.transform(row => ({
       ...row,
+      platform: row.platform ?? "", // ensure platform is a string
       notes: row.notes ?? "", // Ensure notes is a string
   }));
   
@@ -55,7 +58,7 @@ export async function getApplications(): Promise<Application[]> {
 
 
 export async function saveApplication(application: Application): Promise<Application> {
-    const { id, companyName, role, dateApplied, status, notes } = ApplicationSchema.parse(application);
+    const { id, platform, companyName, role, dateApplied, status, notes } = ApplicationSchema.parse(application);
 
     const existing = await sql`SELECT id FROM applications WHERE id = ${id}`;
 
@@ -63,16 +66,16 @@ export async function saveApplication(application: Application): Promise<Applica
     if (existing.rowCount > 0) {
         const { rows } = await sql`
             UPDATE applications
-            SET "companyName" = ${companyName}, role = ${role}, "dateApplied" = ${dateApplied.toISOString().split('T')[0]}, status = ${status}, notes = ${notes}
+            SET platform = ${platform}, "companyName" = ${companyName}, role = ${role}, "dateApplied" = ${dateApplied.toISOString().split('T')[0]}, status = ${status}, notes = ${notes}
             WHERE id = ${id}
-            RETURNING id, "companyName", role, "dateApplied", status, notes;
+            RETURNING id, platform, "companyName", role, "dateApplied", status, notes;
         `;
         savedApp = rows[0]
     } else {
         const { rows } = await sql`
-            INSERT INTO applications (id, "companyName", role, "dateApplied", status, notes)
-            VALUES (${id}, ${companyName}, ${role}, ${dateApplied.toISOString().split('T')[0]}, ${status}, ${notes})
-            RETURNING id, "companyName", role, "dateApplied", status, notes;
+            INSERT INTO applications (id, platform, "companyName", role, "dateApplied", status, notes)
+            VALUES (${id}, ${platform}, ${companyName}, ${role}, ${dateApplied.toISOString().split('T')[0]}, ${status}, ${notes})
+            RETURNING id, platform, "companyName", role, "dateApplied", status, notes;
         `;
         savedApp = rows[0];
     }
@@ -81,6 +84,7 @@ export async function saveApplication(application: Application): Promise<Applica
     // We need to parse the returned data to match the Application type
     const DbRowSchema = z.object({
         id: z.string(),
+        platform: z.string().nullable(),
         companyName: z.string(),
         role: z.string(),
         dateApplied: z.date(),
@@ -90,6 +94,7 @@ export async function saveApplication(application: Application): Promise<Applica
     
     const parsedApp = DbRowSchema.transform(row => ({
         ...row,
+        platform: row.platform ?? "",
         notes: row.notes ?? "",
     })).parse(savedApp);
 

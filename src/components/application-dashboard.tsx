@@ -2,37 +2,30 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Application, Status } from "@/lib/types";
-import { statusOptions } from "@/lib/types";
 import { ApplicationForm } from "@/components/application-form";
 import { AppHeader } from "@/components/app-header";
 import { ApplicationList } from "@/components/application-list";
-import { ApplicationTable } from "@/components/application-table";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { deleteApplication, saveApplication, updateApplicationStatus } from "@/lib/applications.service";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-import { useSidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "./ui/sidebar";
 import { Button } from "./ui/button";
-import { PlusCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 
 
 interface ApplicationDashboardProps {
   initialApplications: Application[];
 }
 
-const allFilters: (Status | "All")[] = ["All", ...statusOptions];
-
 export function ApplicationDashboard({ initialApplications }: ApplicationDashboardProps) {
   const [applications, setApplications] = useState<Application[]>(initialApplications);
   const [filter, setFilter] = useState<Status | "All">("All");
-  const [view, setView] = useState<'card' | 'list'>('card');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { setOpenMobile } = useSidebar();
 
 
   useEffect(() => {
@@ -41,8 +34,7 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   
   const handleFilterChange = useCallback((newFilter: Status | "All") => {
     setFilter(newFilter);
-    setOpenMobile(false);
-  }, [setOpenMobile]);
+  }, []);
 
   const handleSaveApplication = async (appData: Application) => {
     try {
@@ -109,8 +101,9 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   }, [applications, filter]);
 
   const handleExport = (formatType: "csv" | "pdf") => {
-    const headers = ["Company Name", "Role", "Date Applied", "Status", "Notes"];
+    const headers = ["Platform", "Company Name", "Role", "Date Applied", "Status", "Notes"];
     const data = filteredApplications.map(app => [
+      app.platform || "",
       app.companyName,
       app.role,
       format(app.dateApplied, "yyyy-MM-dd"),
@@ -142,49 +135,21 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
 
 
   return (
-    <>
-      <SidebarContent className="p-2 flex flex-col">
-          <p className="text-xs font-semibold text-sidebar-foreground/70 mt-4 px-2">STATUS FILTERS</p>
-          <SidebarMenu className="mt-2">
-            {allFilters.map((status) => (
-                <SidebarMenuItem key={status}>
-                    <SidebarMenuButton
-                        onClick={() => handleFilterChange(status)}
-                        isActive={filter === status}
-                    >
-                      {status}
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-      </SidebarContent>
-
-      <div className="flex flex-col h-full">
-        <AppHeader
-            onAdd={() => handleOpenForm()}
-            onExport={handleExport}
-            view={view}
-            onViewChange={setView}
-            applicationCount={filteredApplications.length}
+    <div className="flex flex-col h-screen">
+      <AppHeader
+        onExport={handleExport}
+        applicationCount={filteredApplications.length}
+        filter={filter}
+        onFilterChange={handleFilterChange}
+      />
+      <main className="flex-1 overflow-y-auto p-4">
+        <ApplicationList
+          applications={filteredApplications}
+          onStatusChange={handleStatusChange}
+          onEdit={handleOpenForm}
+          onDelete={handleDelete}
         />
-        <main className="flex-1 p-4 sm:p-6">
-          {view === 'card' ? (
-            <ApplicationList
-              applications={filteredApplications}
-              onStatusChange={handleStatusChange}
-              onEdit={handleOpenForm}
-              onDelete={handleDelete}
-            />
-          ) : (
-            <ApplicationTable
-              applications={filteredApplications}
-              onStatusChange={handleStatusChange}
-              onEdit={handleOpenForm}
-              onDelete={handleDelete}
-            />
-          )}
-        </main>
-      </div>
+      </main>
 
       <ApplicationForm
         isOpen={isFormOpen}
@@ -198,6 +163,13 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
         onOpenChange={(open) => !open && setDeletingApplicationId(null)}
         onConfirm={confirmDelete}
       />
-    </>
+      <Button
+        onClick={() => handleOpenForm()}
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
+      >
+        <Plus className="h-6 w-6" />
+        <span className="sr-only">Add New Application</span>
+      </Button>
+    </div>
   );
 }
