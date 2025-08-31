@@ -1,6 +1,12 @@
 'use server';
 
-import { sql } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
+
+const pool = createPool({
+  connectionString: process.env.POSTGRES_URL || process.env.NETLIFY_DATABASE_URL,
+});
+
+export const sql = pool.sql;
 
 export async function createApplicationsTable() {
   await sql`
@@ -405,3 +411,5 @@ export async function seedInitialData() {
     console.log('Database already seeded');
   }
 }
+
+    

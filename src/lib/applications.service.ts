@@ -1,10 +1,15 @@
 'use server';
 
-import { sql } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 import type { Application, Status } from './types';
 import { ApplicationSchema } from './types';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+
+const pool = createPool({
+  connectionString: process.env.POSTGRES_URL || process.env.NETLIFY_DATABASE_URL,
+});
+const sql = pool.sql;
 
 const ApplicationDBSchema = ApplicationSchema.extend({
   companyName: z.string(),
@@ -46,7 +51,14 @@ export async function getApplications(): Promise<Application[]> {
   
   const applicationsListSchema = z.array(appSchema);
   
-  return applicationsListSchema.parse(rows);
+  const parsedApplications = applicationsListSchema.safeParse(rows);
+
+  if (!parsedApplications.success) {
+    console.error("Failed to parse applications:", parsedApplications.error);
+    return [];
+  }
+
+  return parsedApplications.data;
 }
 
 export async function saveApplication(application: Application): Promise<Application> {
@@ -84,3 +96,5 @@ export async function updateApplicationStatus(id: string, status: Status): Promi
   await sql`UPDATE applications SET status = ${status} WHERE id = ${id};`;
   revalidatePath('/');
 }
+
+    
