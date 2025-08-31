@@ -26,6 +26,8 @@ import { Edit, Trash2, MoreVertical } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FileSearch } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ApplicationCard } from "./application-card";
 
 
 interface ApplicationTableProps {
@@ -58,6 +60,8 @@ export function ApplicationTable({
   onEdit,
   onDelete,
 }: ApplicationTableProps) {
+  const isMobile = useIsMobile();
+  
     if (applications.length === 0) {
     return (
       <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg bg-card mt-6">
@@ -68,6 +72,22 @@ export function ApplicationTable({
         </p>
       </div>
     );
+  }
+
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {applications.map((application) => (
+          <ApplicationCard
+            key={application.id}
+            application={application}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onStatusChange={onStatusChange}
+          />
+        ))}
+      </div>
+    )
   }
 
   return (

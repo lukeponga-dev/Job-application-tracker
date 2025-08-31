@@ -4,7 +4,7 @@ import type { Application, Status } from "@/lib/types";
 import { statusOptions } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Edit, Trash2, MoreVertical, Calendar, FileText } from "lucide-react";
 import { format } from "date-fns";
@@ -31,10 +31,10 @@ export function ApplicationCard({ application, onEdit, onDelete, onStatusChange 
   const { id, companyName, role, dateApplied, status, notes } = application;
 
   return (
-    <Card className="flex flex-col hover:shadow-md transition-shadow duration-200">
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-start justify-between pb-4">
         <div className="flex-1">
-          <CardTitle className="text-lg">{companyName}</CardTitle>
+          <CardTitle className="text-lg font-semibold">{companyName}</CardTitle>
           <CardDescription>{role}</CardDescription>
         </div>
         <DropdownMenu>
@@ -72,11 +72,11 @@ export function ApplicationCard({ application, onEdit, onDelete, onStatusChange 
         </DropdownMenu>
       </CardHeader>
       <CardContent className="space-y-4 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4 justify-between">
             <Badge
                 variant={getBadgeVariant(status)}
                 className={cn(
-                    "capitalize py-1 px-3 text-xs",
+                    "capitalize py-1 px-3 text-xs font-medium",
                     status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
                 )}
             >
@@ -88,9 +88,9 @@ export function ApplicationCard({ application, onEdit, onDelete, onStatusChange 
             </div>
         </div>
         {notes && (
-            <div className="flex items-start text-sm text-muted-foreground pt-4 border-t">
-                <FileText className="mr-3 h-4 w-4 mt-1 shrink-0" />
-                <p className="flex-1 whitespace-pre-wrap font-sans text-xs leading-relaxed line-clamp-3">{notes}</p>
+            <div className="flex items-start text-sm text-muted-foreground pt-4 border-t mt-4">
+                <FileText className="mr-3 h-4 w-4 mt-0.5 shrink-0" />
+                <p className="flex-1 whitespace-pre-wrap font-sans text-xs leading-relaxed">{notes}</p>
             </div>
         )}
       </CardContent>

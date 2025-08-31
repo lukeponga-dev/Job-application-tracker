@@ -34,10 +34,10 @@ export function AppHeader({ onAdd, onExport, view, onViewChange, applicationCoun
             </Button>
             <div>
                  <h1 className="text-2xl font-bold text-foreground">
-                    Applications
+                    My Applications
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    {applicationCount} {applicationCount === 1 ? 'application' : 'applications'} found.
+                    You have {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}.
                 </p>
             </div>
         </div>
@@ -55,9 +55,9 @@ export function AppHeader({ onAdd, onExport, view, onViewChange, applicationCoun
           </div>
          <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
+            <Button variant="outline" size="icon" className="h-9 w-9">
+              <Download className="h-4 w-4" />
+              <span className="sr-only">Export</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
