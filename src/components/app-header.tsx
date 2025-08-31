@@ -1,10 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Briefcase } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import type { Status } from "@/lib/types";
 import { statusOptions } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 interface AppHeaderProps {
   onAdd: () => void;
@@ -17,21 +16,23 @@ const allFilters: (Status | "All")[] = ["All", ...statusOptions];
 
 export function AppHeader({ onAdd, filter, onFilterChange, applicationCount }: AppHeaderProps) {
   return (
-    <header className="bg-card/80 backdrop-blur-sm sticky top-0 z-10 w-full border-b">
+    <header className="bg-card/80 backdrop-blur-sm sticky top-0 z-10 w-full mb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Briefcase className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">
-              JobTrack Pro
+        <div className="flex pt-8 pb-4 items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Your Applications
             </h1>
+            <p className="text-muted-foreground">
+              You have {applicationCount} {applicationCount === 1 ? 'application' : 'applications'} matching the filter.
+            </p>
           </div>
           <Button onClick={onAdd} size="sm">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Application
           </Button>
         </div>
-        <div className="flex items-center justify-between pb-4">
+        <div className="flex items-center justify-start pb-4">
             <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2">
                 {allFilters.map((status) => (
                     <Button
@@ -44,9 +45,6 @@ export function AppHeader({ onAdd, filter, onFilterChange, applicationCount }: A
                     {status}
                     </Button>
                 ))}
-            </div>
-            <div className="hidden sm:block text-sm text-muted-foreground font-medium pr-2">
-                {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
             </div>
         </div>
       </div>

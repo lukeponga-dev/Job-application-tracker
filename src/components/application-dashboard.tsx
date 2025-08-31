@@ -122,13 +122,13 @@ export function ApplicationDashboard() {
 
   return (
     <>
-      <AppHeader
-        onAdd={() => handleOpenForm()}
-        filter={filter}
-        onFilterChange={setFilter}
-        applicationCount={filteredApplications.length}
-      />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
+         <AppHeader
+            onAdd={() => handleOpenForm()}
+            filter={filter}
+            onFilterChange={setFilter}
+            applicationCount={filteredApplications.length}
+        />
         <ApplicationList
           applications={filteredApplications}
           onStatusChange={handleStatusChange}
