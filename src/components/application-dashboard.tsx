@@ -165,7 +165,7 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
       />
       <Button
         onClick={() => handleOpenForm()}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-accent hover:bg-accent/90"
       >
         <Plus className="h-6 w-6" />
         <span className="sr-only">Add New Application</span>

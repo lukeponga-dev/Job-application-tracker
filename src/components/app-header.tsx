@@ -16,17 +16,17 @@ const filterOptions: (Status | "All")[] = ["All", "Applied", "Interviewing", "Of
 
 export function AppHeader({ onExport, applicationCount, filter, onFilterChange }: AppHeaderProps) {
   return (
-    <header className="px-4 pt-6 pb-4 sticky top-0 z-10 bg-background">
+    <header className="px-4 pt-6 pb-4 sticky top-0 z-10 bg-background/80 backdrop-blur-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Applications
+          <h1 className="text-2xl font-bold text-foreground">
+            JobTrack Pro
           </h1>
           <p className="text-sm text-muted-foreground">
-            {applicationCount} {applicationCount === 1 ? 'application' : 'applications'} found
+            You have {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}.
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => onExport("csv")}>
+        <Button variant="ghost" size="icon" onClick={() => onExport("csv")} className="text-muted-foreground">
           <Download className="h-5 w-5" />
           <span className="sr-only">Export</span>
         </Button>
@@ -36,14 +36,12 @@ export function AppHeader({ onExport, applicationCount, filter, onFilterChange }
         {filterOptions.map((option) => (
           <Button
             key={option}
-            variant="ghost"
+            variant={filter === option ? "default" : "ghost"}
             size="sm"
             onClick={() => onFilterChange(option)}
             className={cn(
               "rounded-full px-4 h-8",
-              filter === option
-                ? "bg-secondary text-secondary-foreground"
-                : "text-muted-foreground"
+              filter === option ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground"
             )}
           >
             {option}

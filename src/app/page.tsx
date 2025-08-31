@@ -7,8 +7,8 @@ export default async function Home() {
   const initialApplications = await getApplications();
 
   return (
-    <div className="flex justify-center">
-      <div className="w-full max-w-md">
+    <div className="flex justify-center bg-background">
+      <div className="w-full max-w-2xl">
         <ApplicationDashboard initialApplications={initialApplications} />
       </div>
     </div>
