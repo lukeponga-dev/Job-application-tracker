@@ -3,20 +3,13 @@
 import type { Application, Status } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Edit, Trash2, MoreVertical, Calendar, Briefcase } from "lucide-react";
 import { format } from "date-fns";
@@ -40,27 +33,24 @@ const getBadgeVariant = (status: Status): "default" | "secondary" | "destructive
   }
 };
 
-const statusOptions: Status[] = ["Applied", "Interviewing", "Offer", "Rejected"];
-
 
 export function ApplicationRow({ application, onStatusChange, onEdit, onDelete, isMobile = false }: ApplicationRowProps) {
   const { id, companyName, role, dateApplied, status } = application;
 
   if (isMobile) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="flex flex-col">
+        <CardHeader className="flex-1">
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <CardTitle className="text-lg">{companyName}</CardTitle>
-              <CardDescription className="flex items-center gap-2 pt-1">
-                <Briefcase className="h-4 w-4" />
-                <span>{role}</span>
+              <CardTitle className="text-base font-semibold">{companyName}</CardTitle>
+              <CardDescription className="text-xs">
+                {role}
               </CardDescription>
             </div>
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 -mt-1 -mr-2">
                   <MoreVertical className="h-4 w-4" />
                   <span className="sr-only">More options</span>
                 </Button>
@@ -78,48 +68,41 @@ export function ApplicationRow({ application, onStatusChange, onEdit, onDelete, 
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Calendar className="h-4 w-4" />
-            <span>Applied on {format(dateApplied, "MMM d, yyyy")}</span>
-          </div>
-           <Select onValueChange={(value: Status) => onStatusChange(id, value)} defaultValue={status}>
-              <SelectTrigger>
-                  <SelectValue placeholder="Update status" />
-              </SelectTrigger>
-              <SelectContent>
-                  {statusOptions.map(option => (
-                  <SelectItem key={option} value={option}>{option}</SelectItem>
-                  ))}
-              </SelectContent>
-          </Select>
+        <CardContent className="flex-1">
+          <Badge 
+              variant={getBadgeVariant(status)}
+              className={cn(
+                  "w-fit text-xs font-medium",
+                  status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
+              )}
+          >
+              {status}
+          </Badge>
         </CardContent>
-         <CardFooter>
-            <Badge 
-                variant={getBadgeVariant(status)}
-                className={cn(
-                    "w-fit text-xs",
-                    status === 'Interviewing' && 'bg-accent/90 text-accent-foreground border-transparent'
-                )}
-            >
-                {status}
-            </Badge>
-         </CardFooter>
+        <div className="p-6 pt-0 mt-auto text-xs text-muted-foreground flex items-center justify-between">
+           <div className="flex items-center gap-2">
+             <Calendar className="h-3.5 w-3.5" />
+            <span>{format(dateApplied, "MMM d, yyyy")}</span>
+           </div>
+        </div>
       </Card>
     );
   }
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{companyName}</TableCell>
-      <TableCell>{role}</TableCell>
+      <TableCell>
+        <div className="font-medium">{companyName}</div>
+        <div className="text-sm text-muted-foreground">{role}</div>
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">{role}</TableCell>
       <TableCell>{format(dateApplied, "MMM d, yyyy")}</TableCell>
       <TableCell>
         <Badge 
             variant={getBadgeVariant(status)}
             className={cn(
                 "w-fit",
-                status === 'Interviewing' && 'bg-accent/90 text-accent-foreground border-transparent'
+                status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
             )}
         >
             {status}

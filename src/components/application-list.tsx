@@ -22,7 +22,7 @@ interface ApplicationListProps {
 export function ApplicationList({ applications, onStatusChange, onEdit, onDelete }: ApplicationListProps) {
   if (applications.length === 0) {
     return (
-      <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg">
+      <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg bg-background">
         <FileSearch className="mx-auto h-12 w-12 text-muted-foreground" />
         <h3 className="mt-4 text-lg font-semibold text-foreground">No Applications Found</h3>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -35,7 +35,7 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
   return (
     <>
       {/* Mobile view: Card layout */}
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
         {applications.map((application) => (
           <ApplicationRow
             key={application.id}

@@ -8,7 +8,7 @@ import { ApplicationList } from "@/components/application-list";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { deleteApplication, saveApplication, updateApplicationStatus } from "@/lib/applications.service";
-import { useRouter } from "next/navigation";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface ApplicationDashboardProps {
   initialApplications: Application[];
@@ -21,7 +21,6 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
   const { toast } = useToast();
-  const router = useRouter();
 
   useEffect(() => {
     setApplications(initialApplications);
@@ -85,21 +84,26 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
 
 
   return (
-    <>
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
-         <AppHeader
-            onAdd={() => handleOpenForm()}
-            filter={filter}
-            onFilterChange={setFilter}
-            applicationCount={filteredApplications.length}
-        />
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-4 border-b md:hidden">
+        <SidebarTrigger />
+        <h1 className="text-lg font-semibold">JobTrack Pro</h1>
+        <div className="w-8"></div>
+      </div>
+      <AppHeader
+          onAdd={() => handleOpenForm()}
+          filter={filter}
+          onFilterChange={setFilter}
+          applicationCount={filteredApplications.length}
+      />
+      <div className="flex-1 overflow-y-auto px-6 md:px-8 pb-6 md:pb-8">
         <ApplicationList
           applications={filteredApplications}
           onStatusChange={handleStatusChange}
           onEdit={handleOpenForm}
           onDelete={handleDelete}
         />
-      </main>
+      </div>
       <ApplicationForm
         isOpen={isFormOpen}
         onOpenChange={setIsFormOpen}
@@ -112,6 +116,6 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
         onOpenChange={(open) => !open && setDeletingApplicationId(null)}
         onConfirm={confirmDelete}
       />
-    </>
+    </div>
   );
 }

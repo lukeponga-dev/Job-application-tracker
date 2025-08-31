@@ -16,38 +16,42 @@ const allFilters: (Status | "All")[] = ["All", ...statusOptions];
 
 export function AppHeader({ onAdd, filter, onFilterChange, applicationCount }: AppHeaderProps) {
   return (
-    <header className="bg-card/80 backdrop-blur-sm sticky top-0 z-10 w-full mb-8">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex pt-8 pb-4 items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Your Applications
-            </h1>
-            <p className="text-muted-foreground">
-              You have {applicationCount} {applicationCount === 1 ? 'application' : 'applications'} matching the filter.
-            </p>
+    <header className="p-6 md:p-8">
+      <div className="flex items-center justify-between pb-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+            Your Applications
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            You have {applicationCount} {applicationCount === 1 ? 'application' : 'applications'} matching your filter.
+          </p>
+        </div>
+        <Button onClick={onAdd} className="hidden sm:inline-flex">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Application
+        </Button>
+      </div>
+      <div className="flex items-center justify-start border-t pt-4">
+          <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2 -mb-2">
+              {allFilters.map((status) => (
+                  <Button
+                  key={status}
+                  variant={filter === status ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => onFilterChange(status)}
+                  className="rounded-full shrink-0"
+                  >
+                  {status}
+                  </Button>
+              ))}
           </div>
-          <Button onClick={onAdd} size="sm">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Application
+      </div>
+       <div className="sm:hidden fixed bottom-4 right-4 z-20">
+          <Button onClick={onAdd} size="icon" className="h-14 w-14 rounded-full shadow-lg">
+            <PlusCircle className="h-6 w-6" />
+            <span className="sr-only">Add Application</span>
           </Button>
         </div>
-        <div className="flex items-center justify-start pb-4">
-            <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2">
-                {allFilters.map((status) => (
-                    <Button
-                    key={status}
-                    variant={filter === status ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => onFilterChange(status)}
-                    className="rounded-full shrink-0"
-                    >
-                    {status}
-                    </Button>
-                ))}
-            </div>
-        </div>
-      </div>
     </header>
   );
 }
