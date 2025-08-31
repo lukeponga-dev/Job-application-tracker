@@ -53,8 +53,7 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[25%]">Company</TableHead>
-              <TableHead className="w-[25%]">Role</TableHead>
+              <TableHead className="w-[40%]">Company</TableHead>
               <TableHead>Date Applied</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>

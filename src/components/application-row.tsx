@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TableRow, TableCell } from "@/components/ui/table";
-import { Edit, Trash2, MoreVertical, Calendar, Briefcase } from "lucide-react";
+import { Edit, Trash2, MoreVertical, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -91,13 +91,12 @@ export function ApplicationRow({ application, onStatusChange, onEdit, onDelete, 
 
   return (
     <TableRow>
-      <TableCell>
+      <TableCell className="py-2">
         <div className="font-medium">{companyName}</div>
         <div className="text-sm text-muted-foreground">{role}</div>
       </TableCell>
-      <TableCell className="hidden lg:table-cell">{role}</TableCell>
-      <TableCell>{format(dateApplied, "MMM d, yyyy")}</TableCell>
-      <TableCell>
+      <TableCell className="py-2">{format(dateApplied, "MMM d, yyyy")}</TableCell>
+      <TableCell className="py-2">
         <Badge 
             variant={getBadgeVariant(status)}
             className={cn(
@@ -108,7 +107,7 @@ export function ApplicationRow({ application, onStatusChange, onEdit, onDelete, 
             {status}
         </Badge>
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-right py-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
