@@ -60,7 +60,7 @@ export function ApplicationTable({
 }: ApplicationTableProps) {
     if (applications.length === 0) {
     return (
-      <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg bg-card">
+      <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg bg-card mt-6">
         <FileSearch className="mx-auto h-12 w-12 text-muted-foreground" />
         <h3 className="mt-4 text-lg font-semibold text-foreground">No Applications Found</h3>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -74,10 +74,10 @@ export function ApplicationTable({
         <Table>
         <TableHeader>
             <TableRow>
-            <TableHead>Company</TableHead>
-            <TableHead className="hidden md:table-cell">Role</TableHead>
-            <TableHead className="hidden md:table-cell">Date Applied</TableHead>
+            <TableHead>Company & Role</TableHead>
+            <TableHead className="hidden lg:table-cell">Date Applied</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead className="hidden sm:table-cell">Notes</TableHead>
             <TableHead>
                 <span className="sr-only">Actions</span>
             </TableHead>
@@ -85,20 +85,19 @@ export function ApplicationTable({
         </TableHeader>
         <TableBody>
             {applications.map((application) => (
-            <TableRow key={application.id}>
+            <TableRow key={application.id} className="hover:bg-muted/50">
                 <TableCell>
                     <div className="font-medium">{application.companyName}</div>
-                    <div className="text-muted-foreground md:hidden">{application.role}</div>
+                    <div className="text-sm text-muted-foreground">{application.role}</div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell">{application.role}</TableCell>
-                <TableCell className="hidden md:table-cell">
+                <TableCell className="hidden lg:table-cell">
                     {format(application.dateApplied, "MMM d, yyyy")}
                 </TableCell>
                 <TableCell>
                 <Badge
                     variant={getBadgeVariant(application.status)}
                     className={cn(
-                    "capitalize",
+                    "capitalize text-xs",
                     application.status === "Interviewing" &&
                         "bg-accent text-accent-foreground border-transparent"
                     )}
@@ -106,11 +105,14 @@ export function ApplicationTable({
                     {application.status}
                 </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  <p className="line-clamp-2 text-sm text-muted-foreground">{application.notes}</p>
+                </TableCell>
+                <TableCell className="text-right">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                     <Button size="icon" variant="ghost">
-                        <MoreVertical className="h-5 w-5" />
+                        <MoreVertical className="h-5 w-5 text-muted-foreground" />
                         <span className="sr-only">Actions</span>
                     </Button>
                     </DropdownMenuTrigger>

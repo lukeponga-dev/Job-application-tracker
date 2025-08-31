@@ -31,16 +31,16 @@ export function ApplicationCard({ application, onEdit, onDelete, onStatusChange 
   const { id, companyName, role, dateApplied, status, notes } = application;
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col hover:shadow-md transition-shadow duration-200">
       <CardHeader className="flex flex-row items-start justify-between pb-4">
         <div className="flex-1">
-          <CardTitle className="text-xl">{companyName}</CardTitle>
+          <CardTitle className="text-lg">{companyName}</CardTitle>
           <CardDescription>{role}</CardDescription>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" className="-mt-1 -mr-1">
-              <MoreVertical className="h-5 w-5" />
+            <Button size="icon" variant="ghost" className="-mt-1 -mr-1 h-8 w-8">
+              <MoreVertical className="h-5 w-5 text-muted-foreground" />
               <span className="sr-only">Actions</span>
             </Button>
           </DropdownMenuTrigger>
@@ -72,28 +72,28 @@ export function ApplicationCard({ application, onEdit, onDelete, onStatusChange 
         </DropdownMenu>
       </CardHeader>
       <CardContent className="space-y-4 flex-1">
-         <Badge
-              variant={getBadgeVariant(status)}
-              className={cn(
-                  "capitalize text-sm py-1 px-3",
-                  status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
-              )}
-          >
-              {status}
-          </Badge>
+        <div className="flex items-center gap-2">
+            <Badge
+                variant={getBadgeVariant(status)}
+                className={cn(
+                    "capitalize py-1 px-3 text-xs",
+                    status === 'Interviewing' && 'bg-accent text-accent-foreground border-transparent'
+                )}
+            >
+                {status}
+            </Badge>
+             <div className="flex items-center text-xs text-muted-foreground">
+                <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                <span>{format(dateApplied, "MMM d, yyyy")}</span>
+            </div>
+        </div>
         {notes && (
             <div className="flex items-start text-sm text-muted-foreground pt-4 border-t">
                 <FileText className="mr-3 h-4 w-4 mt-1 shrink-0" />
-                <p className="flex-1 whitespace-pre-wrap font-sans">{notes}</p>
+                <p className="flex-1 whitespace-pre-wrap font-sans text-xs leading-relaxed line-clamp-3">{notes}</p>
             </div>
         )}
       </CardContent>
-      <CardFooter className="bg-muted/50 p-4 mt-4">
-        <div className="flex items-center text-sm text-muted-foreground w-full">
-            <Calendar className="mr-2 h-4 w-4" />
-            <span className="flex-1">Applied on {format(dateApplied, "MMM d, yyyy")}</span>
-        </div>
-      </CardFooter>
     </Card>
   );
 }

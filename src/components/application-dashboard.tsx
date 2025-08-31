@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Application, Status } from "@/lib/types";
+import { statusOptions } from "@/lib/types";
 import { ApplicationForm } from "@/components/application-form";
 import { AppHeader } from "@/components/app-header";
 import { ApplicationList } from "@/components/application-list";
@@ -12,11 +13,16 @@ import { deleteApplication, saveApplication, updateApplicationStatus } from "@/l
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
+import { useSidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "./ui/sidebar";
+import { Button } from "./ui/button";
+import { PlusCircle } from "lucide-react";
 
 
 interface ApplicationDashboardProps {
   initialApplications: Application[];
 }
+
+const allFilters: (Status | "All")[] = ["All", ...statusOptions];
 
 export function ApplicationDashboard({ initialApplications }: ApplicationDashboardProps) {
   const [applications, setApplications] = useState<Application[]>(initialApplications);
@@ -26,18 +32,22 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { setOpenMobile } = useSidebar();
+
 
   useEffect(() => {
-    // This effect ensures that if the initialApplications prop changes (e.g., due to a server-side re-render),
-    // the component's state is updated to reflect the new data.
     setApplications(initialApplications);
   }, [initialApplications]);
+  
+  const handleFilterChange = useCallback((newFilter: Status | "All") => {
+    setFilter(newFilter);
+    setOpenMobile(false);
+  }, [setOpenMobile]);
 
   const handleSaveApplication = async (appData: Application) => {
     try {
       const savedApplication = await saveApplication(appData);
       
-      // If editing, replace the old application, otherwise add the new one
       setApplications(prev => {
           const exists = prev.some(app => app.id === savedApplication.id);
           if (exists) {
@@ -62,7 +72,6 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   };
 
   const handleStatusChange = async (id: string, status: Status) => {
-    // Optimistic update
     const originalApplications = applications;
     setApplications(apps => apps.map(app => (app.id === id ? { ...app, status } : app)));
     try {
@@ -80,7 +89,6 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
 
   const confirmDelete = async () => {
     if (deletingApplicationId) {
-       // Optimistic update
       const originalApplications = applications;
       setApplications(apps => apps.filter(app => app.id !== deletingApplicationId));
       setDeletingApplicationId(null);
@@ -134,34 +142,54 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
 
 
   return (
-    <div className="flex flex-col h-full">
-      <AppHeader
-          onAdd={() => handleOpenForm()}
-          onExport={handleExport}
-          filter={filter}
-          onFilterChange={setFilter}
-          applicationCount={filteredApplications.length}
-          view={view}
-          onViewChange={setView}
-      />
-      <div className="flex-1 mt-6">
-        {view === 'card' && (
-          <ApplicationList
-            applications={filteredApplications}
-            onStatusChange={handleStatusChange}
-            onEdit={handleOpenForm}
-            onDelete={handleDelete}
-          />
-        )}
-        {view === 'list' && (
-          <ApplicationTable
-            applications={filteredApplications}
-            onStatusChange={handleStatusChange}
-            onEdit={handleOpenForm}
-            onDelete={handleDelete}
-          />
-        )}
+    <>
+      <SidebarContent className="p-2 flex flex-col">
+          <Button onClick={() => handleOpenForm()} className="w-full">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Application
+          </Button>
+          <p className="text-xs font-semibold text-sidebar-foreground/70 mt-4 px-2">STATUS FILTERS</p>
+          <SidebarMenu className="mt-2">
+            {allFilters.map((status) => (
+                <SidebarMenuItem key={status}>
+                    <SidebarMenuButton
+                        onClick={() => handleFilterChange(status)}
+                        isActive={filter === status}
+                    >
+                      {status}
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+      </SidebarContent>
+
+      <div className="flex flex-col h-full">
+        <AppHeader
+            onAdd={() => handleOpenForm()}
+            onExport={handleExport}
+            view={view}
+            onViewChange={setView}
+            applicationCount={filteredApplications.length}
+        />
+        <main className="flex-1 p-4 sm:p-6">
+          {view === 'card' ? (
+            <ApplicationList
+              applications={filteredApplications}
+              onStatusChange={handleStatusChange}
+              onEdit={handleOpenForm}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <ApplicationTable
+              applications={filteredApplications}
+              onStatusChange={handleStatusChange}
+              onEdit={handleOpenForm}
+              onDelete={handleDelete}
+            />
+          )}
+        </main>
       </div>
+
       <ApplicationForm
         isOpen={isFormOpen}
         onOpenChange={setIsFormOpen}
@@ -174,6 +202,6 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
         onOpenChange={(open) => !open && setDeletingApplicationId(null)}
         onConfirm={confirmDelete}
       />
-    </div>
+    </>
   );
 }
