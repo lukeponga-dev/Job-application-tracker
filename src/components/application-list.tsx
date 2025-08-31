@@ -41,7 +41,7 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
           <TableRow>
             <TableHead className="w-[25%]">Company</TableHead>
             <TableHead className="w-[25%]">Role</TableHead>
-            <TableHead className="hidden md:table-cell">Date Applied</TableHead>
+            <TableHead>Date Applied</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>

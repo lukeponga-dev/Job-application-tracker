@@ -46,7 +46,7 @@ export function ApplicationRow({ application, onStatusChange, onEdit, onDelete }
     <TableRow>
       <TableCell className="font-medium">{companyName}</TableCell>
       <TableCell>{role}</TableCell>
-      <TableCell className="hidden md:table-cell">{format(dateApplied, "MMM d, yyyy")}</TableCell>
+      <TableCell>{format(dateApplied, "MMM d, yyyy")}</TableCell>
       <TableCell>
         <div className="hidden sm:block">
             <Badge 
