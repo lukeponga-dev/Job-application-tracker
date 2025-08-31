@@ -22,13 +22,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Edit, Trash2, MoreVertical } from "lucide-react";
+import { Edit, Trash2, MoreVertical, FileSearch } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { FileSearch } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ApplicationCard } from "./application-card";
-
 
 interface ApplicationTableProps {
   applications: Application[];
@@ -37,22 +32,13 @@ interface ApplicationTableProps {
   onDelete: (id: string) => void;
 }
 
-const getBadgeVariant = (
-  status: Status
-): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
-    case "Offer":
-      return "default";
-    case "Rejected":
-      return "destructive";
-    case "Applied":
-      return "secondary";
-    case "Interviewing":
-      return "outline";
-    default:
-      return "outline";
-  }
-};
+const statusStyles: Record<Status, string> = {
+    Applied: "bg-blue-100 text-blue-800 border-blue-200",
+    Interviewing: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    Offer: "bg-green-100 text-green-800 border-green-200",
+    Rejected: "bg-red-100 text-red-800 border-red-200",
+}
+
 
 export function ApplicationTable({
   applications,
@@ -60,7 +46,6 @@ export function ApplicationTable({
   onEdit,
   onDelete,
 }: ApplicationTableProps) {
-  const isMobile = useIsMobile();
   
     if (applications.length === 0) {
     return (
@@ -74,31 +59,15 @@ export function ApplicationTable({
     );
   }
 
-  if (isMobile) {
-    return (
-      <div className="space-y-4">
-        {applications.map((application) => (
-          <ApplicationCard
-            key={application.id}
-            application={application}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onStatusChange={onStatusChange}
-          />
-        ))}
-      </div>
-    )
-  }
-
   return (
     <div className="border rounded-lg overflow-hidden bg-card">
         <Table>
         <TableHeader>
             <TableRow>
-            <TableHead>Company & Role</TableHead>
+            <TableHead>Company</TableHead>
+            <TableHead>Role</TableHead>
             <TableHead className="hidden lg:table-cell">Date Applied</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="hidden sm:table-cell">Notes</TableHead>
             <TableHead>
                 <span className="sr-only">Actions</span>
             </TableHead>
@@ -109,25 +78,20 @@ export function ApplicationTable({
             <TableRow key={application.id} className="hover:bg-muted/50">
                 <TableCell>
                     <div className="font-medium">{application.companyName}</div>
-                    <div className="text-sm text-muted-foreground">{application.role}</div>
+                    <div className="text-sm text-muted-foreground">{application.platform || ''}</div>
+                </TableCell>
+                <TableCell>
+                    <div className="font-medium">{application.role}</div>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
                     {format(application.dateApplied, "MMM d, yyyy")}
                 </TableCell>
                 <TableCell>
                 <Badge
-                    variant={getBadgeVariant(application.status)}
-                    className={cn(
-                    "capitalize text-xs",
-                    application.status === "Interviewing" &&
-                        "bg-accent text-accent-foreground border-transparent"
-                    )}
+                    className={`capitalize text-xs whitespace-nowrap rounded-full font-medium ${statusStyles[application.status]}`}
                 >
                     {application.status}
                 </Badge>
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  <p className="line-clamp-2 text-sm text-muted-foreground">{application.notes}</p>
                 </TableCell>
                 <TableCell className="text-right">
                 <DropdownMenu>

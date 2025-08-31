@@ -3,6 +3,8 @@
 import type { Application, Status } from "@/lib/types";
 import { ApplicationCard } from "./application-card";
 import { FileSearch } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ApplicationTable } from "./application-table";
 
 interface ApplicationListProps {
   applications: Application[];
@@ -12,6 +14,8 @@ interface ApplicationListProps {
 }
 
 export function ApplicationList({ applications, onStatusChange, onEdit, onDelete }: ApplicationListProps) {
+  const isMobile = useIsMobile();
+
   if (applications.length === 0) {
     return (
       <div className="text-center py-16 px-4">
@@ -24,17 +28,27 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
     );
   }
 
+  if (isMobile) {
+    return (
+        <div className="space-y-4">
+            {applications.map((application) => (
+            <ApplicationCard
+                key={application.id}
+                application={application}
+                onEdit={onEdit}
+                onDelete={onDelete}
+            />
+            ))}
+        </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-        {applications.map((application) => (
-          <ApplicationCard
-            key={application.id}
-            application={application}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onStatusChange={onStatusChange}
-          />
-        ))}
-    </div>
+    <ApplicationTable 
+        applications={applications}
+        onStatusChange={onStatusChange}
+        onEdit={onEdit}
+        onDelete={onDelete}
+    />
   );
 }

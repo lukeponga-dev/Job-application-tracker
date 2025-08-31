@@ -1,7 +1,6 @@
 "use client";
 
 import type { Application, Status } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -10,9 +9,8 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { FileText, Edit, Trash2, Calendar, Briefcase, Building } from "lucide-react";
+import { FileText, Edit, Trash2, Calendar } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface ApplicationCardProps {
@@ -20,23 +18,6 @@ interface ApplicationCardProps {
   onEdit: (application: Application) => void;
   onDelete: (id: string) => void;
 }
-
-const getBadgeVariant = (
-  status: Status
-): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
-    case "Offer":
-      return "default";
-    case "Rejected":
-      return "destructive";
-    case "Applied":
-      return "secondary";
-    case "Interviewing":
-      return "outline";
-    default:
-      return "outline";
-  }
-};
 
 const statusStyles: Record<Status, string> = {
     Applied: "bg-blue-100 text-blue-800 border-blue-200",
@@ -61,14 +42,11 @@ export function ApplicationCard({
                 <CardTitle className="text-base font-semibold text-foreground">{role}</CardTitle>
                 <CardDescription className="text-sm text-muted-foreground">{companyName} {platform && `via ${platform}`}</CardDescription>
             </div>
-            <Badge
-                className={cn(
-                    "capitalize text-xs whitespace-nowrap rounded-full font-medium",
-                    statusStyles[status]
-                  )}
+            <div
+                className={`capitalize text-xs whitespace-nowrap rounded-full font-medium px-2.5 py-0.5 ${statusStyles[status]}`}
             >
                 {status}
-            </Badge>
+            </div>
         </div>
       </CardHeader>
       <CardContent>
