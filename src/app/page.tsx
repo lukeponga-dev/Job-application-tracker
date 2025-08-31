@@ -1,12 +1,11 @@
 import { ApplicationDashboard } from "@/components/application-dashboard";
 import { Sidebar, SidebarContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Briefcase } from "lucide-react";
-import { createApplicationsTable, seedInitialData } from "@/lib/db";
+import { createApplicationsTable } from "@/lib/db";
 import { getApplications } from "@/lib/applications.service";
 
 export default async function Home() {
   await createApplicationsTable();
-  await seedInitialData();
   const initialApplications = await getApplications();
 
   return (
