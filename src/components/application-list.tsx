@@ -1,11 +1,15 @@
 "use client";
 
 import type { Application, Status } from "@/lib/types";
-import { ApplicationRow } from "./application-row";
+import { ApplicationTableRow } from "./application-table-row";
 import { FileSearch } from "lucide-react";
 import {
-  Accordion
-} from "@/components/ui/accordion"
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+} from "@/components/ui/table";
 
 
 interface ApplicationListProps {
@@ -29,16 +33,27 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
   }
 
   return (
-    <Accordion type="single" collapsible className="w-full space-y-4">
-      {applications.map((application) => (
-        <ApplicationRow
-          key={application.id}
-          application={application}
-          onStatusChange={onStatusChange}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
-    </Accordion>
+    <div className="border rounded-lg">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-2/5">Company & Role</TableHead>
+            <TableHead className="hidden sm:table-cell">Date Applied</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {applications.map((application) => (
+            <ApplicationTableRow
+              key={application.id}
+              application={application}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
