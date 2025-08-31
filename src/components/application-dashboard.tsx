@@ -8,6 +8,10 @@ import { ApplicationList } from "@/components/application-list";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { deleteApplication, saveApplication, updateApplicationStatus } from "@/lib/applications.service";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { format } from "date-fns";
+
 
 interface ApplicationDashboardProps {
   initialApplications: Application[];
@@ -81,11 +85,44 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
     return applications.filter(app => app.status === filter);
   }, [applications, filter]);
 
+  const handleExport = (formatType: "csv" | "pdf") => {
+    const headers = ["Company Name", "Role", "Date Applied", "Status", "Notes"];
+    const data = filteredApplications.map(app => [
+      app.companyName,
+      app.role,
+      format(app.dateApplied, "yyyy-MM-dd"),
+      app.status,
+      app.notes || ""
+    ]);
+
+    if (formatType === "csv") {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + [headers.join(","), ...data.map(e => e.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "applications.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (formatType === "pdf") {
+      const doc = new jsPDF();
+      doc.text("Job Applications", 14, 15);
+      autoTable(doc, {
+        head: [headers],
+        body: data,
+        startY: 20,
+      });
+      doc.save("applications.pdf");
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-full">
       <AppHeader
           onAdd={() => handleOpenForm()}
+          onExport={handleExport}
           filter={filter}
           onFilterChange={setFilter}
           applicationCount={filteredApplications.length}
