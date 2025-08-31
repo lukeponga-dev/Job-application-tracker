@@ -144,10 +144,6 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   return (
     <>
       <SidebarContent className="p-2 flex flex-col">
-          <Button onClick={() => handleOpenForm()} className="w-full">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Application
-          </Button>
           <p className="text-xs font-semibold text-sidebar-foreground/70 mt-4 px-2">STATUS FILTERS</p>
           <SidebarMenu className="mt-2">
             {allFilters.map((status) => (
