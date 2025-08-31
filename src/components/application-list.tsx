@@ -1,17 +1,8 @@
 "use client";
 
 import type { Application, Status } from "@/lib/types";
-import { ApplicationTableRow } from "./application-table-row";
 import { ApplicationCard } from "./application-card";
 import { FileSearch } from "lucide-react";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-} from "@/components/ui/table";
-
 
 interface ApplicationListProps {
   applications: Application[];
@@ -34,34 +25,7 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
   }
 
   return (
-    <>
-      {/* Desktop Table View */}
-      <div className="border rounded-lg hidden md:block">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Company</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Date Applied</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {applications.map((application) => (
-              <ApplicationTableRow
-                key={application.id}
-                application={application}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="grid gap-4 md:hidden">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {applications.map((application) => (
           <ApplicationCard
             key={application.id}
@@ -71,7 +35,6 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
             onStatusChange={onStatusChange}
           />
         ))}
-      </div>
-    </>
+    </div>
   );
 }
