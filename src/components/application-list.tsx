@@ -6,11 +6,9 @@ import { FileSearch } from "lucide-react";
 import {
   Table,
   TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
 } from "@/components/ui/table"
 
 
@@ -35,29 +33,46 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
   }
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[25%]">Company</TableHead>
-            <TableHead className="w-[25%]">Role</TableHead>
-            <TableHead>Date Applied</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {applications.map((application) => (
-            <ApplicationRow
-              key={application.id}
-              application={application}
-              onStatusChange={onStatusChange}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <>
+      {/* Mobile view: Card layout */}
+      <div className="md:hidden space-y-4">
+        {applications.map((application) => (
+          <ApplicationRow
+            key={application.id}
+            application={application}
+            onStatusChange={onStatusChange}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            isMobile
+          />
+        ))}
+      </div>
+
+      {/* Desktop view: Table layout */}
+      <div className="hidden md:block border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[25%]">Company</TableHead>
+              <TableHead className="w-[25%]">Role</TableHead>
+              <TableHead>Date Applied</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {applications.map((application) => (
+              <ApplicationRow
+                key={application.id}
+                application={application}
+                onStatusChange={onStatusChange}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
   );
 }
