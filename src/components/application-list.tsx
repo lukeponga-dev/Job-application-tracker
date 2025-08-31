@@ -37,7 +37,8 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-2/5">Company & Role</TableHead>
+            <TableHead>Company</TableHead>
+            <TableHead>Role</TableHead>
             <TableHead className="hidden sm:table-cell">Date Applied</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>

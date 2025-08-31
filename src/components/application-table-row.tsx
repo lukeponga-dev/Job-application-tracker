@@ -38,6 +38,8 @@ export function ApplicationTableRow({ application, onEdit, onDelete }: Applicati
     <TableRow>
       <TableCell>
         <div className="font-medium">{companyName}</div>
+      </TableCell>
+       <TableCell>
         <div className="text-sm text-muted-foreground">{role}</div>
       </TableCell>
       <TableCell className="hidden sm:table-cell">{format(dateApplied, "MMM d, yyyy")}</TableCell>
