@@ -1,4 +1,4 @@
-# **App Name**: JobTrack Pro
+# **App Name**: Job Application Tracker
 
 ## Core Features:
 
