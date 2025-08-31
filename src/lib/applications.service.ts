@@ -7,24 +7,46 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 
 const ApplicationDBSchema = ApplicationSchema.extend({
-  companyname: z.string(),
-  dateapplied: z.date(),
-}).omit({ companyName: true, dateApplied: true });
+  companyName: z.string(),
+  dateApplied: z.date(),
+});
 
 function fromDb(app: z.infer<typeof ApplicationDBSchema>): Application {
+    const parsed = ApplicationDBSchema.parse(app);
     return {
-        id: app.id,
-        companyName: app.companyname,
-        role: app.role,
-        dateApplied: app.dateapplied,
-        status: app.status,
-        notes: app.notes,
+        id: parsed.id,
+        companyName: parsed.companyName,
+        role: parsed.role,
+        dateApplied: parsed.dateApplied,
+        status: parsed.status,
+        notes: parsed.notes,
     }
 }
 
 export async function getApplications(): Promise<Application[]> {
-  const { rows } = await sql`SELECT * FROM applications ORDER BY "dateApplied" DESC;`;
-  return rows.map(row => fromDb(ApplicationDBSchema.parse(row)));
+  // Use correct column names with quotes to preserve casing
+  const { rows } = await sql`SELECT id, "companyName", role, "dateApplied", status, notes FROM applications ORDER BY "dateApplied" DESC;`;
+  
+  // The 'rows' from vercel/postgres are already parsed into JS types.
+  // We just need to validate against our schema.
+  // We'll create a schema that matches the database return shape.
+  const DbRowSchema = z.object({
+      id: z.string(),
+      companyName: z.string(),
+      role: z.string(),
+      dateApplied: z.date(),
+      status: z.enum(["Applied", "Interviewing", "Offer", "Rejected"]),
+      notes: z.string().nullable().optional(),
+  });
+
+  const appSchema = DbRowSchema.transform(row => ({
+      ...row,
+      notes: row.notes ?? undefined,
+  }));
+  
+  const applicationsListSchema = z.array(appSchema);
+  
+  return applicationsListSchema.parse(rows);
 }
 
 export async function saveApplication(application: Application): Promise<Application> {
@@ -38,16 +60,16 @@ export async function saveApplication(application: Application): Promise<Applica
             UPDATE applications
             SET "companyName" = ${companyName}, role = ${role}, "dateApplied" = ${dateApplied.toISOString()}, status = ${status}, notes = ${notes}
             WHERE id = ${id}
-            RETURNING *;
+            RETURNING id, "companyName", role, "dateApplied", status, notes;
         `;
-        savedApp = fromDb(ApplicationDBSchema.parse(rows[0]));
+        savedApp = ApplicationSchema.parse(rows[0])
     } else {
         const { rows } = await sql`
             INSERT INTO applications (id, "companyName", role, "dateApplied", status, notes)
             VALUES (${id}, ${companyName}, ${role}, ${dateApplied.toISOString()}, ${status}, ${notes})
-            RETURNING *;
+            RETURNING id, "companyName", role, "dateApplied", status, notes;
         `;
-        savedApp = fromDb(ApplicationDBSchema.parse(rows[0]));
+        savedApp = ApplicationSchema.parse(rows[0]);
     }
     revalidatePath('/');
     return savedApp;
