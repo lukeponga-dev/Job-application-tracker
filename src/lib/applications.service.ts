@@ -1,15 +1,11 @@
 'use server';
 
-import { createPool } from '@vercel/postgres';
 import type { Application, Status } from './types';
 import { ApplicationSchema } from './types';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { sql } from './db';
 
-const pool = createPool({
-  connectionString: process.env.POSTGRES_URL || process.env.NETLIFY_DATABASE_URL,
-});
-const sql = pool.sql;
 
 const ApplicationDBSchema = ApplicationSchema.extend({
   companyName: z.string(),
@@ -96,5 +92,3 @@ export async function updateApplicationStatus(id: string, status: Status): Promi
   await sql`UPDATE applications SET status = ${status} WHERE id = ${id};`;
   revalidatePath('/');
 }
-
-    

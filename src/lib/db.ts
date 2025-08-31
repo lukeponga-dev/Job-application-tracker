@@ -1,15 +1,43 @@
 'use server';
 
-import { createPool } from '@vercel/postgres';
+import { createPool, sql as vercelSql, VercelPool } from '@vercel/postgres';
 
-const pool = createPool({
-  connectionString: process.env.POSTGRES_URL || process.env.NETLIFY_DATABASE_URL,
-});
+let pool: VercelPool | undefined;
 
-export const sql = pool.sql;
+function getDbPool() {
+  if (!pool) {
+    if (process.env.POSTGRES_URL) {
+      pool = createPool({
+        connectionString: process.env.POSTGRES_URL,
+      });
+    } else if (process.env.NETLIFY_DATABASE_URL) {
+      pool = createPool({
+        connectionString: process.env.NETLIFY_DATABASE_URL,
+      });
+    }
+  }
+  return pool;
+}
+
+export const sql = async (
+  strings: TemplateStringsArray,
+  ...values: any[]
+): Promise<any> => {
+  const pool = getDbPool();
+  if (pool) {
+    return await pool.sql(strings, ...values);
+  }
+  // Fallback for environments where pool is not created, though it might fail if not configured.
+  return await vercelSql(strings, ...values);
+};
 
 export async function createApplicationsTable() {
-  await sql`
+  const pool = getDbPool();
+  if (!pool) {
+    console.log("Database connection not configured, skipping table creation.");
+    return;
+  }
+  await pool.sql`
     CREATE TABLE IF NOT EXISTS applications (
       id UUID PRIMARY KEY,
       "companyName" VARCHAR(255) NOT NULL,
@@ -22,7 +50,12 @@ export async function createApplicationsTable() {
 }
 
 export async function seedInitialData() {
-  const applications = [
+  const pool = getDbPool();
+  if (!pool) {
+    console.log("Database connection not configured, skipping seeding.");
+    return;
+  }
+   const applications = [
     {
         role: "Mobile PC Technician and Consultant",
         companyName: "SEEK",
@@ -396,12 +429,12 @@ export async function seedInitialData() {
     }
   ];
 
-  const { rows: existing } = await sql`SELECT COUNT(*) FROM applications`;
+  const { rows: existing } = await pool.sql`SELECT COUNT(*) FROM applications`;
   const count = parseInt(existing[0].count, 10);
 
   if (count === 0) {
     for (const app of applications) {
-      await sql`
+      await pool.sql`
         INSERT INTO applications (id, "companyName", role, "dateApplied", status, notes)
         VALUES (gen_random_uuid(), ${app.companyName}, ${app.role}, ${app.dateApplied}, ${app.status}, ${app.notes});
       `;
@@ -411,5 +444,3 @@ export async function seedInitialData() {
     console.log('Database already seeded');
   }
 }
-
-    
