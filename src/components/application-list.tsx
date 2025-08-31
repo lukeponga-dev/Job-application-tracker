@@ -1,8 +1,7 @@
 "use client";
 
 import type { Application, Status } from "@/lib/types";
-import { ApplicationRow } from "./application-row";
-import { Accordion } from "@/components/ui/accordion";
+import { ApplicationCard } from "./application-card";
 import { FileSearch } from "lucide-react";
 
 interface ApplicationListProps {
@@ -26,9 +25,9 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
   }
 
   return (
-    <Accordion type="single" collapsible className="space-y-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {applications.map((application) => (
-          <ApplicationRow
+          <ApplicationCard
             key={application.id}
             application={application}
             onEdit={onEdit}
@@ -36,6 +35,6 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
             onStatusChange={onStatusChange}
           />
         ))}
-    </Accordion>
+    </div>
   );
 }
