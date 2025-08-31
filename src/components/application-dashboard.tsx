@@ -8,7 +8,6 @@ import { ApplicationList } from "@/components/application-list";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { deleteApplication, saveApplication, updateApplicationStatus } from "@/lib/applications.service";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface ApplicationDashboardProps {
   initialApplications: Application[];
@@ -85,18 +84,13 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-4 border-b md:hidden">
-        <SidebarTrigger />
-        <h1 className="text-lg font-semibold">JobTrack Pro</h1>
-        <div className="w-8"></div>
-      </div>
       <AppHeader
           onAdd={() => handleOpenForm()}
           filter={filter}
           onFilterChange={setFilter}
           applicationCount={filteredApplications.length}
       />
-      <div className="flex-1 overflow-y-auto px-6 md:px-8 pb-6 md:pb-8">
+      <div className="flex-1 mt-6">
         <ApplicationList
           applications={filteredApplications}
           onStatusChange={handleStatusChange}

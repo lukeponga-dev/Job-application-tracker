@@ -16,8 +16,8 @@ const allFilters: (Status | "All")[] = ["All", ...statusOptions];
 
 export function AppHeader({ onAdd, filter, onFilterChange, applicationCount }: AppHeaderProps) {
   return (
-    <header className="p-6 md:p-8">
-      <div className="flex items-center justify-between pb-6">
+    <header>
+      <div className="flex items-center justify-between pb-4 border-b">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
             Your Applications
@@ -31,7 +31,7 @@ export function AppHeader({ onAdd, filter, onFilterChange, applicationCount }: A
           Add Application
         </Button>
       </div>
-      <div className="flex items-center justify-start border-t pt-4">
+      <div className="flex items-center justify-start pt-4">
           <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2 -mb-2">
               {allFilters.map((status) => (
                   <Button
