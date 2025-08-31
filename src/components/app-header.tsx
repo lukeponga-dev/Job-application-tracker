@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, PlusCircle } from "lucide-react";
+import { Download, PlusCircle, LayoutGrid, List } from "lucide-react";
 import type { Status } from "@/lib/types";
 import { statusOptions } from "@/lib/types";
 import {
@@ -17,11 +17,13 @@ interface AppHeaderProps {
   filter: Status | "All";
   onFilterChange: (filter: Status | "All") => void;
   applicationCount: number;
+  view: 'card' | 'list';
+  onViewChange: (view: 'card' | 'list') => void;
 }
 
 const allFilters: (Status | "All")[] = ["All", ...statusOptions];
 
-export function AppHeader({ onAdd, onExport, filter, onFilterChange, applicationCount }: AppHeaderProps) {
+export function AppHeader({ onAdd, onExport, filter, onFilterChange, applicationCount, view, onViewChange }: AppHeaderProps) {
   return (
     <header>
       <div className="flex items-center justify-between pb-4 border-b">
@@ -52,7 +54,7 @@ export function AppHeader({ onAdd, onExport, filter, onFilterChange, application
           </Button>
         </div>
       </div>
-      <div className="flex items-center justify-start pt-4">
+      <div className="flex items-center justify-between pt-4">
           <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2 -mb-2">
               {allFilters.map((status) => (
                   <Button
@@ -65,6 +67,16 @@ export function AppHeader({ onAdd, onExport, filter, onFilterChange, application
                   {status}
                   </Button>
               ))}
+          </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <Button variant={view === 'card' ? 'secondary' : 'ghost'} size="icon" onClick={() => onViewChange('card')}>
+              <LayoutGrid className="h-5 w-5" />
+              <span className="sr-only">Card View</span>
+            </Button>
+            <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => onViewChange('list')}>
+              <List className="h-5 w-5" />
+              <span className="sr-only">List View</span>
+            </Button>
           </div>
       </div>
        <div className="sm:hidden fixed bottom-4 right-4 z-20 flex flex-col gap-2">

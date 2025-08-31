@@ -5,6 +5,7 @@ import type { Application, Status } from "@/lib/types";
 import { ApplicationForm } from "@/components/application-form";
 import { AppHeader } from "@/components/app-header";
 import { ApplicationList } from "@/components/application-list";
+import { ApplicationTable } from "@/components/application-table";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { deleteApplication, saveApplication, updateApplicationStatus } from "@/lib/applications.service";
@@ -20,6 +21,7 @@ interface ApplicationDashboardProps {
 export function ApplicationDashboard({ initialApplications }: ApplicationDashboardProps) {
   const [applications, setApplications] = useState<Application[]>(initialApplications);
   const [filter, setFilter] = useState<Status | "All">("All");
+  const [view, setView] = useState<'card' | 'list'>('card');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
@@ -139,14 +141,26 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
           filter={filter}
           onFilterChange={setFilter}
           applicationCount={filteredApplications.length}
+          view={view}
+          onViewChange={setView}
       />
       <div className="flex-1 mt-6">
-        <ApplicationList
-          applications={filteredApplications}
-          onStatusChange={handleStatusChange}
-          onEdit={handleOpenForm}
-          onDelete={handleDelete}
-        />
+        {view === 'card' && (
+          <ApplicationList
+            applications={filteredApplications}
+            onStatusChange={handleStatusChange}
+            onEdit={handleOpenForm}
+            onDelete={handleDelete}
+          />
+        )}
+        {view === 'list' && (
+          <ApplicationTable
+            applications={filteredApplications}
+            onStatusChange={handleStatusChange}
+            onEdit={handleOpenForm}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
       <ApplicationForm
         isOpen={isFormOpen}
