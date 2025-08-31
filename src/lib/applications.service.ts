@@ -6,22 +6,18 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { sql } from './db';
 
-
-const ApplicationDBSchema = ApplicationSchema.extend({
-  companyName: z.string(),
-  dateApplied: z.date(),
-});
-
-function fromDb(app: z.infer<typeof ApplicationDBSchema>): Application {
-    const parsed = ApplicationDBSchema.parse(app);
-    return {
-        id: parsed.id,
-        companyName: parsed.companyName,
-        role: parsed.role,
-        dateApplied: parsed.dateApplied,
-        status: parsed.status,
-        notes: parsed.notes,
-    }
+// This function is not used, but it's a good example of how to parse data from the database
+// if the column names don't match the object properties.
+function fromDb(app: Record<string, any>): Application {
+    const parsed = ApplicationSchema.parse({
+        id: app.id,
+        companyName: app.companyname,
+        role: app.role,
+        dateApplied: app.dateapplied,
+        status: app.status,
+        notes: app.notes,
+    });
+    return parsed;
 }
 
 export async function getApplications(): Promise<Application[]> {
@@ -42,7 +38,7 @@ export async function getApplications(): Promise<Application[]> {
 
   const appSchema = DbRowSchema.transform(row => ({
       ...row,
-      notes: row.notes ?? undefined,
+      notes: row.notes ?? "", // Ensure notes is a string
   }));
   
   const applicationsListSchema = z.array(appSchema);
@@ -57,8 +53,9 @@ export async function getApplications(): Promise<Application[]> {
   return parsedApplications.data;
 }
 
+
 export async function saveApplication(application: Application): Promise<Application> {
-    const { id, companyName, role, dateApplied, status, notes } = application;
+    const { id, companyName, role, dateApplied, status, notes } = ApplicationSchema.parse(application);
 
     const existing = await sql`SELECT id FROM applications WHERE id = ${id}`;
 
@@ -66,22 +63,39 @@ export async function saveApplication(application: Application): Promise<Applica
     if (existing.rowCount > 0) {
         const { rows } = await sql`
             UPDATE applications
-            SET "companyName" = ${companyName}, role = ${role}, "dateApplied" = ${dateApplied.toISOString()}, status = ${status}, notes = ${notes}
+            SET "companyName" = ${companyName}, role = ${role}, "dateApplied" = ${dateApplied.toISOString().split('T')[0]}, status = ${status}, notes = ${notes}
             WHERE id = ${id}
             RETURNING id, "companyName", role, "dateApplied", status, notes;
         `;
-        savedApp = ApplicationSchema.parse(rows[0])
+        savedApp = rows[0]
     } else {
         const { rows } = await sql`
             INSERT INTO applications (id, "companyName", role, "dateApplied", status, notes)
-            VALUES (${id}, ${companyName}, ${role}, ${dateApplied.toISOString()}, ${status}, ${notes})
+            VALUES (${id}, ${companyName}, ${role}, ${dateApplied.toISOString().split('T')[0]}, ${status}, ${notes})
             RETURNING id, "companyName", role, "dateApplied", status, notes;
         `;
-        savedApp = ApplicationSchema.parse(rows[0]);
+        savedApp = rows[0];
     }
     revalidatePath('/');
-    return savedApp;
+    
+    // We need to parse the returned data to match the Application type
+    const DbRowSchema = z.object({
+        id: z.string(),
+        companyName: z.string(),
+        role: z.string(),
+        dateApplied: z.date(),
+        status: z.enum(["Applied", "Interviewing", "Offer", "Rejected"]),
+        notes: z.string().nullable(),
+    });
+    
+    const parsedApp = DbRowSchema.transform(row => ({
+        ...row,
+        notes: row.notes ?? "",
+    })).parse(savedApp);
+
+    return parsedApp;
 }
+
 
 export async function deleteApplication(id: string): Promise<void> {
   await sql`DELETE FROM applications WHERE id = ${id};`;

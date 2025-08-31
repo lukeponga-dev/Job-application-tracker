@@ -26,12 +26,24 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   const { toast } = useToast();
 
   useEffect(() => {
+    // This effect ensures that if the initialApplications prop changes (e.g., due to a server-side re-render),
+    // the component's state is updated to reflect the new data.
     setApplications(initialApplications);
   }, [initialApplications]);
 
   const handleSaveApplication = async (appData: Application) => {
     try {
-      await saveApplication(appData);
+      const savedApplication = await saveApplication(appData);
+      
+      // If editing, replace the old application, otherwise add the new one
+      setApplications(prev => {
+          const exists = prev.some(app => app.id === savedApplication.id);
+          if (exists) {
+            return prev.map(app => app.id === savedApplication.id ? savedApplication : app);
+          }
+          return [savedApplication, ...prev];
+      });
+
       toast({ title: "Success", description: `Application ${editingApplication ? 'updated' : 'added'} successfully.` });
       setIsFormOpen(false);
       setEditingApplication(null);
@@ -40,6 +52,7 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
       toast({ variant: "destructive", title: "Error", description: "Failed to save application." });
     }
   };
+
 
   const handleOpenForm = (app: Application | null = null) => {
     setEditingApplication(app);

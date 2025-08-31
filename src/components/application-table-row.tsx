@@ -42,7 +42,7 @@ export function ApplicationTableRow({ application, onEdit, onDelete }: Applicati
        <TableCell>
         <div className="text-sm text-muted-foreground">{role}</div>
       </TableCell>
-      <TableCell className="hidden sm:table-cell">{format(dateApplied, "MMM d, yyyy")}</TableCell>
+      <TableCell>{format(dateApplied, "MMM d, yyyy")}</TableCell>
       <TableCell>
         <Badge 
           variant={getBadgeVariant(status)}
