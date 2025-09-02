@@ -5,7 +5,7 @@ import { FileText, Home, Plus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AppHeader } from './app-header';
-import { ModeToggle } from './theme-provider';
+import { ModeToggle } from './mode-toggle';
 
 interface AppLayoutProps {
     children: React.ReactNode;
