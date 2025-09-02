@@ -1,7 +1,7 @@
 'use client';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger } from './ui/sidebar';
 import { Button } from './ui/button';
-import { FilePlus, FileText, Home, Plus } from 'lucide-react';
+import { FileText, Home, Plus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AppHeader } from './app-header';
