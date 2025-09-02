@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, Sparkles, Loader2, FileText } from "lucide-react";
+import { CalendarIcon, Sparkles, Loader2, FileText, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { suggestApplicationStatus } from "@/ai/flows/ai-suggest-application-status";
@@ -43,16 +43,15 @@ import Link from "next/link";
 interface ApplicationFormProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (application: Application) => void;
+  onSave: (application: Omit<Application, 'id'> & { id?: string }) => void;
   application: Application | null;
   onClose: () => void;
 }
 
 export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onClose }: ApplicationFormProps) {
-  const form = useForm<Application>({
+  const form = useForm<Omit<Application, 'id'> & { id?: string }>({
     resolver: zodResolver(ApplicationSchema),
     defaultValues: {
-      id: application?.id || crypto.randomUUID(),
       platform: "",
       companyName: "",
       role: "",
@@ -74,7 +73,7 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
       });
     } else {
       form.reset({
-        id: crypto.randomUUID(),
+        id: undefined,
         platform: "",
         companyName: "",
         role: "",
@@ -91,9 +90,18 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
     setSuggestionReason(null);
     try {
       const formData = form.getValues();
+      if (!formData.dateApplied) {
+          toast({
+            variant: "destructive",
+            title: "Cannot suggest status",
+            description: "Please select a date applied first.",
+          });
+          setIsSuggesting(false);
+          return;
+      }
       const result = await suggestApplicationStatus({
-        companyName: formData.companyName,
-        role: formData.role,
+        companyName: formData.companyName || "",
+        role: formData.role || "",
         dateApplied: formData.dateApplied.toISOString(),
         notes: formData.notes || "",
       });
@@ -113,7 +121,7 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
     }
   };
 
-  const onSubmit = (data: Application) => {
+  const onSubmit = (data: Omit<Application, 'id'> & { id?: string }) => {
     onSave(data);
   };
   

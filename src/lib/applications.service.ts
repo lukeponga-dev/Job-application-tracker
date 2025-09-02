@@ -6,59 +6,48 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { sql } from './db';
 
-// This function is not used, but it's a good example of how to parse data from the database
-// if the column names don't match the object properties.
-function fromDb(app: Record<string, any>): Application {
-    const parsed = ApplicationSchema.parse({
-        id: app.id,
-        platform: app.platform,
-        companyName: app.companyname,
-        role: app.role,
-        dateApplied: app.dateapplied,
-        status: app.status,
-        notes: app.notes,
-    });
-    return parsed;
-}
-
 export async function getApplications(): Promise<Application[]> {
-  // Use correct column names with quotes to preserve casing
-  const { rows } = await sql`SELECT id, platform, "companyName", role, "dateApplied", status, notes FROM applications ORDER BY "dateApplied" DESC;`;
-  
-  // The 'rows' from vercel/postgres are already parsed into JS types.
-  // We just need to validate against our schema.
-  // We'll create a schema that matches the database return shape.
-  const DbRowSchema = z.object({
-      id: z.string(),
-      platform: z.string().nullable().optional(),
-      companyName: z.string(),
-      role: z.string(),
-      dateApplied: z.date(),
-      status: z.enum(["Applied", "Interviewing", "Offer", "Rejected"]),
-      notes: z.string().nullable().optional(),
-  });
+  try {
+    const { rows } = await sql`SELECT id, platform, "companyName", role, "dateApplied", status, notes FROM applications ORDER BY "dateApplied" DESC;`;
+    
+    const appSchema = z.object({
+        id: z.string(),
+        platform: z.string().nullable(),
+        companyName: z.string(),
+        role: z.string(),
+        dateApplied: z.date(),
+        status: z.enum(["Applied", "Interviewing", "Offer", "Rejected"]),
+        notes: z.string().nullable(),
+    });
 
-  const appSchema = DbRowSchema.transform(row => ({
-      ...row,
-      platform: row.platform ?? "", // ensure platform is a string
-      notes: row.notes ?? "", // Ensure notes is a string
-  }));
-  
-  const applicationsListSchema = z.array(appSchema);
-  
-  const parsedApplications = applicationsListSchema.safeParse(rows);
+    const applicationsListSchema = z.array(
+      appSchema.transform(row => ({
+        ...row,
+        platform: row.platform ?? "",
+        notes: row.notes ?? "",
+      }))
+    );
 
-  if (!parsedApplications.success) {
-    console.error("Failed to parse applications:", parsedApplications.error);
+    const parsedApplications = applicationsListSchema.safeParse(rows);
+
+    if (!parsedApplications.success) {
+      console.error("Failed to parse applications:", parsedApplications.error.flatten());
+      return [];
+    }
+
+    return parsedApplications.data;
+  } catch(error) {
+    console.error('Error fetching applications', error)
     return [];
   }
-
-  return parsedApplications.data;
 }
 
-
-export async function saveApplication(application: Application): Promise<Application> {
-    const { id, platform, companyName, role, dateApplied, status, notes } = ApplicationSchema.parse(application);
+export async function saveApplication(application: Omit<Application, 'id'> & { id?: string }): Promise<Application> {
+    const appData = {
+        ...application,
+        id: application.id || crypto.randomUUID(),
+    }
+    const { id, platform, companyName, role, dateApplied, status, notes } = ApplicationSchema.parse(appData);
 
     const existing = await sql`SELECT id FROM applications WHERE id = ${id}`;
 
@@ -81,22 +70,11 @@ export async function saveApplication(application: Application): Promise<Applica
     }
     revalidatePath('/');
     
-    // We need to parse the returned data to match the Application type
-    const DbRowSchema = z.object({
-        id: z.string(),
-        platform: z.string().nullable(),
-        companyName: z.string(),
-        role: z.string(),
-        dateApplied: z.date(),
-        status: z.enum(["Applied", "Interviewing", "Offer", "Rejected"]),
-        notes: z.string().nullable(),
+    const parsedApp = ApplicationSchema.parse({
+      ...savedApp,
+      platform: savedApp.platform ?? "",
+      notes: savedApp.notes ?? "",
     });
-    
-    const parsedApp = DbRowSchema.transform(row => ({
-        ...row,
-        platform: row.platform ?? "",
-        notes: row.notes ?? "",
-    })).parse(savedApp);
 
     return parsedApp;
 }

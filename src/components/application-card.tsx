@@ -52,7 +52,7 @@ export function ApplicationCard({
       <CardContent>
         <div className="flex items-center text-xs text-muted-foreground mb-4">
             <Calendar className="mr-1.5 h-3.5 w-3.5" />
-            <span>Applied on {format(dateApplied, "MMM d, yyyy")}</span>
+            <span>Applied on {format(new Date(dateApplied), "MMM d, yyyy")}</span>
         </div>
         
         {notes && (
@@ -75,7 +75,7 @@ export function ApplicationCard({
           <Button variant="ghost" size="sm" onClick={() => onEdit(application)} className="text-muted-foreground h-8">
             <Edit className="h-4 w-4 mr-1.5" /> Edit
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(id)} className="text-red-500 hover:text-red-600 h-8">
+          <Button variant="ghost" size="sm" onClick={() => onDelete(id!)} className="text-red-500 hover:text-red-600 h-8">
             <Trash2 className="h-4 w-4 mr-1.5" /> Delete
           </Button>
         </div>

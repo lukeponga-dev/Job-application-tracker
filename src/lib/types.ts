@@ -3,7 +3,7 @@ import { z } from "zod";
 export const statusOptions = ["Applied", "Interviewing", "Offer", "Rejected"] as const;
 
 export const ApplicationSchema = z.object({
-  id: z.string().default(() => crypto.randomUUID()),
+  id: z.string().uuid().optional(),
   platform: z.string().optional(),
   companyName: z.string().min(1, "Company name is required."),
   role: z.string().min(1, "Role is required."),

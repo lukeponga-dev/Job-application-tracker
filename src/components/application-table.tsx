@@ -84,7 +84,7 @@ export function ApplicationTable({
                     <div className="font-medium">{application.role}</div>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
-                    {format(application.dateApplied, "MMM d, yyyy")}
+                    {format(new Date(application.dateApplied), "MMM d, yyyy")}
                 </TableCell>
                 <TableCell>
                 <Badge
@@ -113,7 +113,7 @@ export function ApplicationTable({
                             {statusOptions.map((option) => (
                             <DropdownMenuItem
                                 key={option}
-                                onClick={() => onStatusChange(application.id, option)}
+                                onClick={() => onStatusChange(application.id!, option)}
                             >
                                 {option}
                             </DropdownMenuItem>
@@ -123,7 +123,7 @@ export function ApplicationTable({
                     </DropdownMenuSub>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                        onClick={() => onDelete(application.id)}
+                        onClick={() => onDelete(application.id!)}
                         className="text-destructive focus:text-destructive"
                     >
                         <Trash2 className="mr-2 h-4 w-4" />

@@ -8,8 +8,6 @@ export default async function Home() {
   const initialApplications = await getApplications();
 
   return (
-    <AppLayout>
       <ApplicationDashboard initialApplications={initialApplications} />
-    </AppLayout>
   );
 }

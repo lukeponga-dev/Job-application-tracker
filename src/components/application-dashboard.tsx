@@ -11,8 +11,6 @@ import { deleteApplication, saveApplication, updateApplicationStatus } from "@/l
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-import { Button } from "./ui/button";
-import { FilePlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 
@@ -45,7 +43,7 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
     setFilter(newFilter);
   }, []);
 
-  const handleSaveApplication = async (appData: Application) => {
+  const handleSaveApplication = async (appData: Omit<Application, 'id'> & { id?: string }) => {
     try {
       const savedApplication = await saveApplication(appData);
       
