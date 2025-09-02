@@ -33,11 +33,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, Sparkles, Loader2 } from "lucide-react";
+import { CalendarIcon, Sparkles, Loader2, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { suggestApplicationStatus } from "@/ai/flows/ai-suggest-application-status";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 interface ApplicationFormProps {
   isOpen: boolean;
@@ -260,9 +261,17 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>Cancel</Button>
-              <Button type="submit">Save Application</Button>
+            <DialogFooter className="sm:justify-between gap-2">
+              <Button type="button" variant="outline" className="w-full sm:w-auto" asChild>
+                <Link href="/tailor">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Tailor CV / Cover Letter
+                </Link>
+              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>Cancel</Button>
+                <Button type="submit">Save Application</Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

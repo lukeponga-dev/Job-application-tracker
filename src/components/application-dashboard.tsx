@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Application, Status } from "@/lib/types";
 import { ApplicationForm } from "@/components/application-form";
-import { AppHeader } from "@/components/app-header";
+import { AppLayout } from "@/components/app-layout";
 import { ApplicationList } from "@/components/application-list";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +12,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
-import { Plus } from "lucide-react";
+import { FilePlus } from "lucide-react";
 
 
 interface ApplicationDashboardProps {
@@ -136,24 +136,25 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
 
 
   return (
-    <div className="flex flex-col h-screen">
-      <AppHeader
+    <>
+      <AppLayout
+        isDashboard
         onExport={handleExport}
         applicationCount={filteredApplications.length}
         filter={filter}
         onFilterChange={handleFilterChange}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-      />
-      <main className="flex-1 overflow-y-auto p-4">
+        onAddNew={() => handleOpenForm()}
+      >
         <ApplicationList
-          applications={filteredApplications}
-          onStatusChange={handleStatusChange}
-          onEdit={handleOpenForm}
-          onDelete={handleDelete}
-          viewMode={viewMode}
-        />
-      </main>
+            applications={filteredApplications}
+            onStatusChange={handleStatusChange}
+            onEdit={handleOpenForm}
+            onDelete={handleDelete}
+            viewMode={viewMode}
+          />
+      </AppLayout>
 
       <ApplicationForm
         isOpen={isFormOpen}
@@ -167,13 +168,6 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
         onOpenChange={(open) => !open && setDeletingApplicationId(null)}
         onConfirm={confirmDelete}
       />
-      <Button
-        onClick={() => handleOpenForm()}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-accent hover:bg-accent/90"
-      >
-        <Plus className="h-6 w-6" />
-        <span className="sr-only">Add New Application</span>
-      </Button>
-    </div>
+    </>
   );
 }
