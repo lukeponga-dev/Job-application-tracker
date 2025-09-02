@@ -1,10 +1,11 @@
 'use client';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger } from './ui/sidebar';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger, SidebarFooter } from './ui/sidebar';
 import { Button } from './ui/button';
 import { FileText, Home, Plus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AppHeader } from './app-header';
+import { ModeToggle } from './theme-provider';
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -56,6 +57,9 @@ export function AppLayout({ children, isDashboard, ...headerProps }: AppLayoutPr
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+            <ModeToggle />
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         {isDashboard ? (
