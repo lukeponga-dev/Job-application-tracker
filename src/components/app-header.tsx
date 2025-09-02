@@ -33,12 +33,12 @@ export function AppHeader({ onExport, applicationCount, filter, onFilterChange, 
                 </p>
             </div>
         </div>
-        <div className="items-center gap-2 hidden md:flex">
+        <div className="items-center gap-2 flex">
             <Button variant="outline" size="sm" onClick={() => onExport?.("csv")}>
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV
             </Button>
-            <Button size="sm" onClick={onAddNew}>
+            <Button size="sm" onClick={onAddNew} className="hidden md:flex">
                 <FilePlus className="h-4 w-4 mr-2" />
                 Add New
             </Button>
@@ -63,7 +63,7 @@ export function AppHeader({ onExport, applicationCount, filter, onFilterChange, 
             ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <Button variant={viewMode === 'card' ? 'secondary' : 'ghost'} size="icon" onClick={() => onViewModeChange?.('card')} className="text-muted-foreground h-8 w-8">
                 <LayoutGrid className="h-5 w-5" />
                 <span className="sr-only">Card View</span>
