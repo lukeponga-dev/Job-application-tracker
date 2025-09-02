@@ -113,7 +113,7 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
       app.platform || "",
       app.companyName,
       app.role,
-      format(app.dateApplied, "yyyy-MM-dd"),
+      format(new Date(app.dateApplied), "yyyy-MM-dd"),
       app.status,
       app.notes || ""
     ]);

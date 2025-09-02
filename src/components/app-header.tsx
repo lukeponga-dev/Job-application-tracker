@@ -45,8 +45,8 @@ export function AppHeader({ onExport, applicationCount, filter, onFilterChange, 
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
             {filterOptions.map((option) => (
             <Button
                 key={option}
