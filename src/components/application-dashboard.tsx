@@ -25,6 +25,7 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const { toast } = useToast();
 
 
@@ -141,6 +142,8 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
         applicationCount={filteredApplications.length}
         filter={filter}
         onFilterChange={handleFilterChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
       <main className="flex-1 overflow-y-auto p-4">
         <ApplicationList
@@ -148,6 +151,7 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
           onStatusChange={handleStatusChange}
           onEdit={handleOpenForm}
           onDelete={handleDelete}
+          viewMode={viewMode}
         />
       </main>
 

@@ -3,7 +3,6 @@
 import type { Application, Status } from "@/lib/types";
 import { ApplicationCard } from "./application-card";
 import { FileSearch } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { ApplicationTable } from "./application-table";
 
 interface ApplicationListProps {
@@ -11,10 +10,10 @@ interface ApplicationListProps {
   onStatusChange: (id: string, status: Status) => void;
   onEdit: (application: Application) => void;
   onDelete: (id: string) => void;
+  viewMode: 'card' | 'list';
 }
 
-export function ApplicationList({ applications, onStatusChange, onEdit, onDelete }: ApplicationListProps) {
-  const isMobile = useIsMobile();
+export function ApplicationList({ applications, onStatusChange, onEdit, onDelete, viewMode }: ApplicationListProps) {
 
   if (applications.length === 0) {
     return (
@@ -28,7 +27,7 @@ export function ApplicationList({ applications, onStatusChange, onEdit, onDelete
     );
   }
 
-  if (isMobile) {
+  if (viewMode === 'card') {
     return (
         <div className="space-y-4">
             {applications.map((application) => (
