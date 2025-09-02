@@ -49,15 +49,4 @@ export async function createApplicationsTable() {
       notes TEXT
     );
   `;
-
-  // Check if platform column exists, if not, add it. This is for backwards compatibility.
-  const { rows } = await pool.sql`
-    SELECT column_name
-    FROM information_schema.columns
-    WHERE table_name='applications' AND column_name='platform';
-  `;
-
-  if (rows.length === 0) {
-    await pool.sql`ALTER TABLE applications ADD COLUMN platform VARCHAR(255);`;
-  }
 }
