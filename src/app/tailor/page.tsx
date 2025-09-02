@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { tailorDocuments, TailorDocumentsInput } from "@/ai/flows/tailor-document-flow";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Upload } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const tailorFormSchema = z.object({
@@ -26,6 +26,7 @@ export default function TailorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<{ tailoredCv: string; tailoredCoverLetter: string } | null>(null);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof tailorFormSchema>>({
     resolver: zodResolver(tailorFormSchema),
@@ -36,6 +37,25 @@ export default function TailorPage() {
       role: "",
     },
   });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        form.setValue("cv", text);
+      };
+      reader.onerror = () => {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to read the file.",
+        });
+      }
+      reader.readAsText(file);
+    }
+  };
 
   const onSubmit = async (values: TailorDocumentsInput) => {
     setIsLoading(true);
@@ -103,9 +123,24 @@ export default function TailorPage() {
                     name="cv"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Your CV</FormLabel>
+                        <div className="flex justify-between items-center">
+                            <FormLabel>Your CV</FormLabel>
+                            <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Upload CV
+                            </Button>
+                            <FormControl>
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    className="hidden" 
+                                    onChange={handleFileChange}
+                                    accept=".txt,.md,.pdf,.doc,.docx"
+                                />
+                            </FormControl>
+                        </div>
                         <FormControl>
-                          <Textarea placeholder="Paste your CV here..." {...field} className="h-40" />
+                          <Textarea placeholder="Paste your CV here or upload a file..." {...field} className="h-40" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

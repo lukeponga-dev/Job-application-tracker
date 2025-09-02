@@ -55,6 +55,8 @@ Company Name: {{{companyName}}}
 Role: {{{role}}}
 Job Description:
 {{{jobDescription}}}
+
+Return the response in markdown format.
 `,
 });
 

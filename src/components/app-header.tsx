@@ -63,7 +63,7 @@ export function AppHeader({ onExport, applicationCount, filter, onFilterChange, 
             ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
             <Button variant={viewMode === 'card' ? 'secondary' : 'ghost'} size="icon" onClick={() => onViewModeChange?.('card')} className="text-muted-foreground h-8 w-8">
                 <LayoutGrid className="h-5 w-5" />
                 <span className="sr-only">Card View</span>

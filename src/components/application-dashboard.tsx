@@ -13,6 +13,7 @@ import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import { FilePlus } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 interface ApplicationDashboardProps {
@@ -27,7 +28,14 @@ export function ApplicationDashboard({ initialApplications }: ApplicationDashboa
   const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
+
+  useEffect(() => {
+    if (isMobile) {
+        setViewMode('card');
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     setApplications(initialApplications);
