@@ -21,14 +21,14 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-RP3HCNL2Y6"></Script>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-CKPRY89RVC"></Script>
         <Script id="google-analytics">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config', 'G-RP3HCNL2Y6');
+            gtag('config', 'G-CKPRY89RVC');
           `}
         </Script>
       </head>
