@@ -1,8 +1,8 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { ThemeProvider } from '@/components/theme-provider';
+import { AppLayout } from '@/components/app-layout';
 
 export const metadata: Metadata = {
   title: 'JobTrack Pro',
@@ -27,9 +27,9 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
         >
-            <SidebarProvider>
-                {children}
-            </SidebarProvider>
+            <AppLayout>
+              {children}
+            </AppLayout>
             <Toaster />
         </ThemeProvider>
       </body>
