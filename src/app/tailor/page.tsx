@@ -14,6 +14,9 @@ import { useToast } from "@/hooks/use-toast";
 import { tailorDocuments, TailorDocumentsInput } from "@/ai/flows/tailor-document-flow";
 import { Loader2, Sparkles, Upload } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import * as pdfjs from "pdfjs-dist";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const tailorFormSchema = z.object({
   cv: z.string().min(1, "Your CV cannot be empty."),
@@ -38,22 +41,49 @@ export default function TailorPage() {
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        form.setValue("cv", text);
-      };
-      reader.onerror = () => {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to read the file.",
-        });
+      if (file.type === "application/pdf") {
+        try {
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            if (e.target?.result) {
+              const typedarray = new Uint8Array(e.target.result as ArrayBuffer);
+              const pdf = await pdfjs.getDocument(typedarray).promise;
+              let text = "";
+              for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                text += textContent.items.map(item => (item as any).str).join(" ");
+              }
+              form.setValue("cv", text);
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        } catch (error) {
+            console.error("Failed to read PDF:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to read the PDF file.",
+            });
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          form.setValue("cv", text);
+        };
+        reader.onerror = () => {
+          toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to read the file.",
+          });
+        }
+        reader.readAsText(file);
       }
-      reader.readAsText(file);
     }
   };
 
