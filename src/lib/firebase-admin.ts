@@ -1,4 +1,7 @@
 import * as admin from 'firebase-admin';
+import { config } from 'dotenv';
+
+config();
 
 // This is a workaround for Vercel/Next.js issue with replacing private key newline characters
 const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
