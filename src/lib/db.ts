@@ -38,14 +38,13 @@ export async function createApplicationsTable() {
   await pool.sql`
     CREATE TABLE IF NOT EXISTS applications (
       id UUID PRIMARY KEY,
-      "userId" VARCHAR(255) NOT NULL,
+      "userId" VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       platform VARCHAR(255),
       "companyName" VARCHAR(255) NOT NULL,
       role VARCHAR(255) NOT NULL,
       "dateApplied" DATE NOT NULL,
       status VARCHAR(50) NOT NULL,
-      notes TEXT,
-      FOREIGN KEY ("userId") REFERENCES users(id) ON DELETE CASCADE
+      notes TEXT
     );
   `;
 }
