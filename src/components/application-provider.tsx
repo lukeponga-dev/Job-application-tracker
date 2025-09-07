@@ -22,17 +22,18 @@ interface ApplicationContextType {
     setEditingApplication: React.Dispatch<React.SetStateAction<Application | null>>;
     deletingApplicationId: string | null;
     setDeletingApplicationId: React.Dispatch<React.SetStateAction<string | null>>;
-    handleSaveApplication: (appData: Omit<Application, 'id'> & { id?: string }) => Promise<void>;
+    handleSaveApplication: (appData: Omit<Application, 'id' | 'userId'> & { id?: string }) => Promise<void>;
     handleOpenForm: (app?: Application | null) => void;
     handleStatusChange: (id: string, status: Status) => Promise<void>;
     handleDelete: (id: string) => void;
     confirmDelete: () => Promise<void>;
     handleExport: (formatType: "csv" | "pdf") => void;
+    userId: string;
 }
 
 const ApplicationContext = createContext<ApplicationContextType | undefined>(undefined);
 
-export function ApplicationProvider({ children, initialApplications }: { children: React.ReactNode, initialApplications: Application[] }) {
+export function ApplicationProvider({ children, initialApplications, userId }: { children: React.ReactNode, initialApplications: Application[], userId: string }) {
     const [applications, setApplications] = useState<Application[]>(initialApplications);
     const [filter, setFilter] = useState<Status | "All">("All");
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -41,9 +42,10 @@ export function ApplicationProvider({ children, initialApplications }: { childre
     const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
     const { toast } = useToast();
 
-    const handleSaveApplication = async (appData: Omit<Application, 'id'> & { id?: string }) => {
+    const handleSaveApplication = async (appData: Omit<Application, 'id'| 'userId'> & { id?: string }) => {
         try {
-          const savedApplication = await saveApplication(appData);
+          const applicationWithUser = { ...appData, userId };
+          const savedApplication = await saveApplication(applicationWithUser);
           
           setApplications(prev => {
               const exists = prev.some(app => app.id === savedApplication.id);
@@ -71,7 +73,7 @@ export function ApplicationProvider({ children, initialApplications }: { childre
         const originalApplications = applications;
         setApplications(apps => apps.map(app => (app.id === id ? { ...app, status } : app)));
         try {
-          await updateApplicationStatus(id, status);
+          await updateApplicationStatus(id, status, userId);
         } catch (error) {
           setApplications(originalApplications);
           console.error(error);
@@ -89,7 +91,7 @@ export function ApplicationProvider({ children, initialApplications }: { childre
           setApplications(apps => apps.filter(app => app.id !== deletingApplicationId));
           setDeletingApplicationId(null);
           try {
-            await deleteApplication(deletingApplicationId);
+            await deleteApplication(deletingApplicationId, userId);
             toast({ title: "Success", description: "Application deleted." });
           } catch (error) {
             setApplications(originalApplications);
@@ -156,6 +158,7 @@ export function ApplicationProvider({ children, initialApplications }: { childre
         handleDelete,
         confirmDelete,
         handleExport,
+        userId,
     };
 
     return (

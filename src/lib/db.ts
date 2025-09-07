@@ -4,11 +4,9 @@ import { createPool, sql as vercelSql, VercelPool } from '@vercel/postgres';
 
 let pool: VercelPool | undefined;
 
-const NEON_CONNECTION_STRING = "postgresql://neondb_owner:npg_iIbLcNJ1p9Zt@ep-plain-frost-ad2lewzm-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
-
 function getDbPool() {
   if (!pool) {
-    const connectionString = NEON_CONNECTION_STRING || process.env.POSTGRES_URL || process.env.NETLIFY_DATABASE_URL;
+    const connectionString = process.env.POSTGRES_URL;
     if (connectionString) {
       pool = createPool({
         connectionString: connectionString,
@@ -40,12 +38,31 @@ export async function createApplicationsTable() {
   await pool.sql`
     CREATE TABLE IF NOT EXISTS applications (
       id UUID PRIMARY KEY,
+      "userId" VARCHAR(255) NOT NULL,
       platform VARCHAR(255),
       "companyName" VARCHAR(255) NOT NULL,
       role VARCHAR(255) NOT NULL,
       "dateApplied" DATE NOT NULL,
       status VARCHAR(50) NOT NULL,
-      notes TEXT
+      notes TEXT,
+      FOREIGN KEY ("userId") REFERENCES users(id) ON DELETE CASCADE
     );
   `;
+}
+
+export async function createUsersTable() {
+    const pool = getDbPool();
+    if (!pool) {
+      console.log("Database connection not configured, skipping table creation.");
+      return;
+    }
+    
+    await pool.sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id VARCHAR(255) PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        name VARCHAR(255),
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
 }

@@ -1,14 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, FilePlus, LayoutGrid, List } from "lucide-react";
+import { Download, FilePlus, LayoutGrid, List, LogOut } from "lucide-react";
 import type { Status } from "@/lib/types";
 import { useApplicationContext } from "./application-provider";
 import { useMemo } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 const filterOptions: (Status | "All")[] = ["All", "Applied", "Interviewing", "Offer", "Rejected"];
 
 export function AppHeader() {
+  const router = useRouter();
   const { 
     applications, 
     filter, 
@@ -24,6 +28,10 @@ export function AppHeader() {
     return applications.filter(app => app.status === filter);
   }, [applications, filter]);
 
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
 
   return (
     <header className="p-4 border-b">
@@ -44,6 +52,10 @@ export function AppHeader() {
             <Button size="sm" onClick={() => handleOpenForm()}>
                 <FilePlus className="h-4 w-4 mr-2" />
                 Add New
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
             </Button>
         </div>
       </div>

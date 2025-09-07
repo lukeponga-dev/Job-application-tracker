@@ -39,18 +39,22 @@ import { cn } from "@/lib/utils";
 import { suggestApplicationStatus } from "@/ai/flows/ai-suggest-application-status";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { useApplicationContext } from "./application-provider";
+
+const FormSchema = ApplicationSchema.omit({ userId: true });
 
 interface ApplicationFormProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (application: Omit<Application, 'id'> & { id?: string }) => void;
+  onSave: (application: Omit<Application, 'id' | 'userId'> & { id?: string }) => void;
   application: Application | null;
   onClose: () => void;
 }
 
 export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onClose }: ApplicationFormProps) {
-  const form = useForm<Omit<Application, 'id'> & { id?: string }>({
-    resolver: zodResolver(ApplicationSchema),
+  const { userId } = useApplicationContext();
+  const form = useForm<Omit<Application, 'id' | 'userId'> & { id?: string }>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
       platform: "",
       companyName: "",
@@ -121,7 +125,7 @@ export function ApplicationForm({ isOpen, onOpenChange, onSave, application, onC
     }
   };
 
-  const onSubmit = (data: Omit<Application, 'id'> & { id?: string }) => {
+  const onSubmit = (data: Omit<Application, 'id' | 'userId'> & { id?: string }) => {
     onSave(data);
   };
   

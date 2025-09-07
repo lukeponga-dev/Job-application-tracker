@@ -4,6 +4,7 @@ export const statusOptions = ["Applied", "Interviewing", "Offer", "Rejected"] as
 
 export const ApplicationSchema = z.object({
   id: z.string().uuid().optional(),
+  userId: z.string(),
   platform: z.string().optional(),
   companyName: z.string().min(1, "Company name is required."),
   role: z.string().min(1, "Role is required."),
@@ -16,3 +17,12 @@ export const ApplicationSchema = z.object({
 
 export type Application = z.infer<typeof ApplicationSchema>;
 export type Status = Application['status'];
+
+export const UserSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string().nullable(),
+  createdAt: z.date(),
+});
+
+export type User = z.infer<typeof UserSchema>;
