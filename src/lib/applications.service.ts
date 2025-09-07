@@ -76,10 +76,16 @@ export async function saveApplication(application: Omit<Application, 'id'> & { i
     }
     revalidatePath('/');
     
-    const parsedApp = ApplicationSchema.parse({
+    // The 'dateApplied' comes back as a string from the DB, so we need to parse it.
+    const dbAppWithDate = {
       ...savedApp,
-      platform: savedApp.platform ?? "",
-      notes: savedApp.notes ?? "",
+      dateApplied: new Date(savedApp.dateApplied),
+    };
+    
+    const parsedApp = ApplicationSchema.parse({
+      ...dbAppWithDate,
+      platform: dbAppWithDate.platform ?? "",
+      notes: dbAppWithDate.notes ?? "",
     });
 
     return parsedApp;
