@@ -1,14 +1,14 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
-// You should populate this with your own Firebase project configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "pck_caeqhrx2emdh722882b5syyy3a1d9prdext0fas9f0e9r",
-  authDomain: "5d464cca-638b-455d-9428-f5116a043334.firebaseapp.com",
-  projectId: "5d464cca-638b-455d-9428-f5116a043334",
-  storageBucket: "5d464cca-638b-455d-9428-f5116a043334.appspot.com",
-  messagingSenderId: "", // Optional, can be left empty
-  appId: "", // Optional, can be left empty
+  apiKey: "AIzaSyAioUFzEdlHwkP0ywRGuZdSe1mnMxx6tPI",
+  authDomain: "jobtrack-pro-2ixz2.firebaseapp.com",
+  projectId: "jobtrack-pro-2ixz2",
+  storageBucket: "jobtrack-pro-2ixz2.appspot.com",
+  messagingSenderId: "1087971918693",
+  appId: "1:1087971918693:web:1352445a97145f0300978c"
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
