@@ -21,7 +21,7 @@ function getDbOwner() {
     return dbOwner;
 }
 
-export const getDb = (): NeonQueryFunction<false, false> => {
+export async function getDb(): Promise<NeonQueryFunction<false, false>> {
     const authHeader = headers().get('Authorization');
     const token = authHeader?.split('Bearer ')[1];
     const url = process.env.DATABASE_AUTHENTICATED_URL;

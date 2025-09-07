@@ -14,7 +14,7 @@ export async function getApplications(): Promise<Application[]> {
   }
   
   try {
-    const sql = getDb();
+    const sql = await getDb();
     const { rows } = await sql`
       SELECT id, "userId", platform, "companyName", role, "dateApplied", status, notes 
       FROM applications 
@@ -59,7 +59,7 @@ export async function saveApplication(application: Omit<Application, 'id' | 'use
     if (!user) {
         throw new Error("User not authenticated");
     }
-    const sql = getDb();
+    const sql = await getDb();
 
     const appData = {
         ...application,
@@ -110,7 +110,7 @@ export async function deleteApplication(id: string): Promise<void> {
     if (!user) {
         throw new Error("User not authenticated");
     }
-    const sql = getDb();
+    const sql = await getDb();
     await sql`DELETE FROM applications WHERE id = ${id};`;
     revalidatePath('/');
 }
@@ -120,7 +120,7 @@ export async function updateApplicationStatus(id: string, status: Status): Promi
     if (!user) {
         throw new Error("User not authenticated");
     }
-    const sql = getDb();
+    const sql = await getDb();
     await sql`UPDATE applications SET status = ${status} WHERE id = ${id};`;
     revalidatePath('/');
 }

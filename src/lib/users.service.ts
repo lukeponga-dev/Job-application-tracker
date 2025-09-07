@@ -1,13 +1,12 @@
 'use server';
 
-import { sql } from './db';
+import { getDb } from './db';
 import type { User } from './types';
 import { UserSchema } from './types';
-import { z } from 'zod';
-
 
 export async function getUser(id: string): Promise<User | null> {
     try {
+        const sql = await getDb();
         const { rows } = await sql`SELECT id, email, name, "createdAt" FROM users WHERE id = ${id};`;
         if (rows.length === 0) {
             return null;
@@ -28,6 +27,7 @@ export async function getUser(id: string): Promise<User | null> {
 
 export async function createUser(user: Omit<User, 'createdAt'>): Promise<User> {
     const { id, email, name } = user;
+    const sql = await getDb();
     const { rows } = await sql`
         INSERT INTO users (id, email, name)
         VALUES (${id}, ${email}, ${name})
