@@ -55,6 +55,7 @@ export default function LoginPage() {
         title: "Google Sign-In Failed",
         description: "Please try again.",
       });
+    } finally {
       setIsSigningInWithGoogle(false);
     }
   };
@@ -79,6 +80,7 @@ export default function LoginPage() {
         title: "Sign-Up Failed",
         description: error.message || "An unexpected error occurred.",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -103,6 +105,7 @@ export default function LoginPage() {
         title: "Sign-In Failed",
         description: error.message || "Incorrect email or password.",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -151,7 +154,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isSigningInWithGoogle}
                 />
               </div>
               <div className="space-y-2">
@@ -162,7 +165,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isSigningInWithGoogle}
                 />
               </div>
               <div className="flex gap-2">
@@ -171,7 +174,7 @@ export default function LoginPage() {
                   Sign In
                 </Button>
                 <Button type="button" variant="secondary" onClick={handleEmailPasswordSignUp} className="flex-1" disabled={isSubmitting || isSigningInWithGoogle}>
-                  Sign Up
+                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Sign Up"}
                 </Button>
               </div>
             </form>
