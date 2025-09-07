@@ -10,23 +10,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'idToken is required' }, { status: 400 });
   }
 
-  const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-
+  // We are not setting a session cookie anymore with RLS.
+  // We just return success if the token is valid, so the client can store it.
   try {
     const app = getAdminApp();
-    const sessionCookie = await getAuth(app).createSessionCookie(idToken, { expiresIn });
-
-    cookies().set('session', sessionCookie, {
-      maxAge: expiresIn,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      sameSite: 'lax',
-    });
-
-    return NextResponse.json({ success: true });
+    await getAuth(app).verifyIdToken(idToken);
+    
+    // The client will now be responsible for storing the idToken and sending it
+    // in the Authorization header for subsequent requests.
+    return NextResponse.json({ success: true, token: idToken });
   } catch (error) {
-    console.error('Error creating session cookie:', error);
-    return NextResponse.json({ error: 'Failed to create session' }, { status: 401 });
+    console.error('Error verifying token:', error);
+    return NextResponse.json({ error: 'Failed to verify token' }, { status: 401 });
   }
 }

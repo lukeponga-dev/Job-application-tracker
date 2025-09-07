@@ -9,6 +9,29 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 
+// Function to get the auth token from localStorage
+const getAuthToken = () => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('authToken');
+    }
+    return null;
+}
+
+// Wrapper for fetch that includes the Authorization header
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const token = getAuthToken();
+    const headers = new Headers(options.headers);
+    if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return fetch(url, {
+        ...options,
+        headers,
+    });
+};
+
+
 interface ApplicationContextType {
     applications: Application[];
     setApplications: React.Dispatch<React.SetStateAction<Application[]>>;
@@ -44,8 +67,7 @@ export function ApplicationProvider({ children, initialApplications, userId }: {
 
     const handleSaveApplication = async (appData: Omit<Application, 'id'| 'userId'> & { id?: string }) => {
         try {
-          const applicationWithUser = { ...appData, userId };
-          const savedApplication = await saveApplication(applicationWithUser);
+          const savedApplication = await saveApplication(appData);
           
           setApplications(prev => {
               const exists = prev.some(app => app.id === savedApplication.id);
@@ -73,7 +95,7 @@ export function ApplicationProvider({ children, initialApplications, userId }: {
         const originalApplications = applications;
         setApplications(apps => apps.map(app => (app.id === id ? { ...app, status } : app)));
         try {
-          await updateApplicationStatus(id, status, userId);
+          await updateApplicationStatus(id, status);
         } catch (error) {
           setApplications(originalApplications);
           console.error(error);
@@ -91,7 +113,7 @@ export function ApplicationProvider({ children, initialApplications, userId }: {
           setApplications(apps => apps.filter(app => app.id !== deletingApplicationId));
           setDeletingApplicationId(null);
           try {
-            await deleteApplication(deletingApplicationId, userId);
+            await deleteApplication(deletingApplicationId);
             toast({ title: "Success", description: "Application deleted." });
           } catch (error) {
             setApplications(originalApplications);

@@ -1,7 +1,6 @@
 
 import { ApplicationDashboard } from "@/components/application-dashboard";
-import { AppHeader } from "@/components/app-header";
-import { createApplicationsTable, createUsersTable } from "@/lib/db";
+import { runDbMigrations } from "@/lib/db";
 import { getApplications } from "@/lib/applications.service";
 import { ApplicationProvider } from "@/components/application-provider";
 import { getAuthenticatedUser } from "@/lib/auth";
@@ -14,9 +13,8 @@ export default async function Home() {
     redirect('/login');
   }
   
-  await createUsersTable();
-  await createApplicationsTable();
-  const initialApplications = await getApplications(user.id);
+  await runDbMigrations();
+  const initialApplications = await getApplications();
 
   return (
     <ApplicationProvider initialApplications={initialApplications} userId={user.id}>

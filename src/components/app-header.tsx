@@ -30,6 +30,9 @@ export function AppHeader() {
 
   const handleSignOut = async () => {
     await signOut(auth);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('authToken');
+    }
     router.push('/login');
   };
 

@@ -4,14 +4,20 @@ import type { Application, Status } from './types';
 import { ApplicationSchema } from './types';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { sql } from './db';
+import { getDb } from './db';
+import { getAuthenticatedUser } from './auth';
 
-export async function getApplications(userId: string): Promise<Application[]> {
+export async function getApplications(): Promise<Application[]> {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return [];
+  }
+  
   try {
+    const sql = getDb();
     const { rows } = await sql`
       SELECT id, "userId", platform, "companyName", role, "dateApplied", status, notes 
       FROM applications 
-      WHERE "userId" = ${userId}
       ORDER BY "dateApplied" DESC;
     `;
     
@@ -48,10 +54,17 @@ export async function getApplications(userId: string): Promise<Application[]> {
   }
 }
 
-export async function saveApplication(application: Omit<Application, 'id'> & { id?: string }): Promise<Application> {
+export async function saveApplication(application: Omit<Application, 'id' | 'userId'> & { id?: string }): Promise<Application> {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+        throw new Error("User not authenticated");
+    }
+    const sql = getDb();
+
     const appData = {
         ...application,
         id: application.id || crypto.randomUUID(),
+        userId: user.id
     }
     const { id, userId, platform, companyName, role, dateApplied, status, notes } = ApplicationSchema.parse(appData);
 
@@ -62,7 +75,7 @@ export async function saveApplication(application: Omit<Application, 'id'> & { i
         const { rows } = await sql`
             UPDATE applications
             SET platform = ${platform}, "companyName" = ${companyName}, role = ${role}, "dateApplied" = ${dateApplied.toISOString().split('T')[0]}, status = ${status}, notes = ${notes}
-            WHERE id = ${id} AND "userId" = ${userId}
+            WHERE id = ${id}
             RETURNING id, "userId", platform, "companyName", role, "dateApplied", status, notes;
         `;
         savedApp = rows[0]
@@ -92,12 +105,22 @@ export async function saveApplication(application: Omit<Application, 'id'> & { i
 }
 
 
-export async function deleteApplication(id: string, userId: string): Promise<void> {
-  await sql`DELETE FROM applications WHERE id = ${id} AND "userId" = ${userId};`;
-  revalidatePath('/');
+export async function deleteApplication(id: string): Promise<void> {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+        throw new Error("User not authenticated");
+    }
+    const sql = getDb();
+    await sql`DELETE FROM applications WHERE id = ${id};`;
+    revalidatePath('/');
 }
 
-export async function updateApplicationStatus(id: string, status: Status, userId: string): Promise<void> {
-  await sql`UPDATE applications SET status = ${status} WHERE id = ${id} AND "userId" = ${userId};`;
-  revalidatePath('/');
+export async function updateApplicationStatus(id: string, status: Status): Promise<void> {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+        throw new Error("User not authenticated");
+    }
+    const sql = getDb();
+    await sql`UPDATE applications SET status = ${status} WHERE id = ${id};`;
+    revalidatePath('/');
 }

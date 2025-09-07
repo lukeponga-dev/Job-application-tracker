@@ -1,41 +1,83 @@
 'use server';
 
-import { createPool, sql as vercelSql, VercelPool } from '@vercel/postgres';
+import { neon, NeonQueryFunction } from '@neondatabase/serverless';
+import { headers } from 'next/headers';
 
-let pool: VercelPool | undefined;
+let dbOwner: NeonQueryFunction<false, false> | undefined;
 
-function getDbPool() {
-  if (!pool) {
-    const connectionString = process.env.POSTGRES_URL;
-    if (connectionString) {
-      pool = createPool({
-        connectionString: connectionString,
-      });
+function getDbOwner() {
+    if (!dbOwner) {
+        const connectionString = process.env.POSTGRES_URL;
+        if (connectionString) {
+            dbOwner = neon(connectionString, {
+                fetchOptions: {
+                    cache: 'no-store'
+                }
+            });
+        } else {
+            throw new Error("Database owner connection string not configured.");
+        }
     }
-  }
-  return pool;
+    return dbOwner;
 }
 
-export const sql = async (
-  strings: TemplateStringsArray,
-  ...values: any[]
-): Promise<any> => {
-  const pool = getDbPool();
-  if (pool) {
-    return await pool.sql(strings, ...values);
-  }
-  // Fallback for environments where pool is not created, though it might fail if not configured.
-  return await vercelSql(strings, ...values);
+export const getDb = (): NeonQueryFunction<false, false> => {
+    const authHeader = headers().get('Authorization');
+    const token = authHeader?.split('Bearer ')[1];
+    const url = process.env.DATABASE_AUTHENTICATED_URL;
+
+    if (!url) {
+        throw new Error("Authenticated database connection string not configured.");
+    }
+    
+    return neon(url, {
+        fetchOptions: {
+            cache: 'no-store'
+        },
+        authToken: token,
+    });
 };
 
-export async function createApplicationsTable() {
-  const pool = getDbPool();
-  if (!pool) {
-    console.log("Database connection not configured, skipping table creation.");
-    return;
-  }
+
+export async function runDbMigrations() {
+  const sql = getDbOwner();
   
-  await pool.sql`
+  await sql`CREATE EXTENSION IF NOT EXISTS pg_session_jwt;`;
+  
+  await createUsersTable();
+  await createApplicationsTable();
+
+  // Grant permissions to roles
+  await sql`GRANT USAGE ON SCHEMA public TO authenticated;`;
+  await sql`GRANT USAGE ON SCHEMA public TO anonymous;`;
+
+  await sql`
+    GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES
+    IN SCHEMA public
+    TO authenticated;
+  `;
+  await sql`
+    GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES
+    IN SCHEMA public
+    TO anonymous;
+  `;
+  await sql`
+    ALTER DEFAULT PRIVILEGES
+    IN SCHEMA public
+    GRANT SELECT, UPDATE, INSERT, DELETE ON TABLES
+    TO authenticated;
+  `;
+  await sql`
+    ALTER DEFAULT PRIVILEGES
+    IN SCHEMA public
+    GRANT SELECT, UPDATE, INSERT, DELETE ON TABLES
+    TO anonymous;
+  `;
+}
+
+export async function createApplicationsTable() {
+  const sql = getDbOwner();
+  await sql`
     CREATE TABLE IF NOT EXISTS applications (
       id UUID PRIMARY KEY,
       "userId" VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -47,21 +89,42 @@ export async function createApplicationsTable() {
       notes TEXT
     );
   `;
+
+  // RLS Policy for applications
+  await sql`ALTER TABLE applications ENABLE ROW LEVEL SECURITY;`;
+  await sql`
+    DROP POLICY IF EXISTS "user_can_access_own_applications" ON applications;
+  `;
+  await sql`
+    CREATE POLICY "user_can_access_own_applications" ON applications
+    FOR ALL
+    TO authenticated
+    USING ("userId" = session_user_id())
+    WITH CHECK ("userId" = session_user_id());
+  `;
 }
 
 export async function createUsersTable() {
-    const pool = getDbPool();
-    if (!pool) {
-      console.log("Database connection not configured, skipping table creation.");
-      return;
-    }
-    
-    await pool.sql`
+    const sql = getDbOwner();
+    await sql`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(255) PRIMARY KEY,
         email VARCHAR(255) NOT NULL,
         name VARCHAR(255),
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+    `;
+
+    // RLS Policy for users
+    await sql`ALTER TABLE users ENABLE ROW LEVEL SECURITY;`;
+    await sql`
+      DROP POLICY IF EXISTS "user_can_access_own_data" ON users;
+    `;
+    await sql`
+      CREATE POLICY "user_can_access_own_data" ON users
+      FOR ALL
+      TO authenticated
+      USING (id = session_user_id())
+      WITH CHECK (id = session_user_id());
     `;
 }

@@ -17,12 +17,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-async function setSessionCookie(idToken: string) {
+async function storeAuthToken(idToken: string) {
   const response = await fetch('/api/auth/session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ idToken }),
   });
+  if (response.ok) {
+    const data = await response.json();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('authToken', data.token);
+    }
+  }
   return response.ok;
 }
 
@@ -42,11 +48,11 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
       
-      const sessionSet = await setSessionCookie(idToken);
-      if (sessionSet) {
+      const tokenStored = await storeAuthToken(idToken);
+      if (tokenStored) {
         router.push("/");
       } else {
-        throw new Error("Failed to set session cookie.");
+        throw new Error("Failed to store auth token.");
       }
     } catch (error) {
       console.error("Google Sign-In Error:", error);
@@ -67,11 +73,11 @@ export default function LoginPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const idToken = await userCredential.user.getIdToken();
       
-      const sessionSet = await setSessionCookie(idToken);
-      if (sessionSet) {
+      const tokenStored = await storeAuthToken(idToken);
+      if (tokenStored) {
         router.push("/");
       } else {
-        throw new Error("Failed to set session cookie.");
+        throw new Error("Failed to store auth token.");
       }
     } catch (error: any) {
       console.error("Email/Password Sign-Up Error:", error);
@@ -92,11 +98,11 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const idToken = await userCredential.user.getIdToken();
 
-      const sessionSet = await setSessionCookie(idToken);
-      if (sessionSet) {
+      const tokenStored = await storeAuthToken(idToken);
+      if (tokenStored) {
         router.push("/");
       } else {
-        throw new Error("Failed to set session cookie.");
+        throw new Error("Failed to store auth token.");
       }
     } catch (error: any) {
       console.error("Email/Password Sign-In Error:", error);
